@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
         '/': (_) => const AuthGate(),
         '/welcome': (_) => const WelcomePage(),
         '/signin': (_) => const SignInPage(),
-        '/home': (_) => const MyHomePage(),
+        '/home': (_) => const HomePage(),
       },
       initialRoute: '/',
     );
@@ -47,7 +47,7 @@ class AuthGate extends StatelessWidget {
           );
         }
 
-        if (snapshot.hasData) return const MyHomePage();
+        if (snapshot.hasData) return const HomePage();
 
         return const WelcomePage();
       },

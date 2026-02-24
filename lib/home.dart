@@ -3,8 +3,8 @@ import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 
 
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
 
 
   @override
@@ -22,7 +22,7 @@ class MyHomePage extends StatelessWidget {
             );
           }
           if(snapshot.hasData){
-            return const MyHomePage();
+            return const HomePage();
           }else{
             return const SignInScreen();
           }
