@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
 import 'firebase_options.dart';
+import 'home.dart';
 import 'welcome.dart';
 import 'signin.dart';
-import 'home.dart';
+import 'register.dart';
 
 void main() async {
+  // 1. ตรวจสอบการเชื่อมต่อกับระบบพื้นฐานของ Flutter
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // 2. เริ่มต้นระบบ Firebase (ถ้าไฟล์นี้ Error ให้รัน flutterfire configure ใน terminal)
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
   runApp(const MyApp());
 }
 
@@ -22,34 +25,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'KU Wongnai',
+      initialRoute: '/home', 
       routes: {
-        '/': (_) => const AuthGate(),
-        '/welcome': (_) => const WelcomePage(),
-        '/signin': (_) => const SignInPage(),
-        '/home': (_) => const HomePage(),
-      },
-      initialRoute: '/',
-    );
-  }
-}
-
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (snapshot.hasData) return const HomePage();
-
-        return const WelcomePage();
+        '/home': (context) => const HomePage(),
+        '/welcome': (context) => const WelcomePage(),
+        '/signin': (context) => const SignInPage(),
+        '/register': (context) => const RegisterPage(),
       },
     );
   }

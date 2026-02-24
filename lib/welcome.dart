@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signin.dart';
+import 'register.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});
@@ -14,22 +15,29 @@ class WelcomePage extends StatelessWidget {
             Expanded(
               child: Center(
                 child: Image.asset(
-                  'assets/images/logo.png', width: 180,),
+                  'assets/images/logo.png',
+                  width: 180,
+                ),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 40),
+              padding: const EdgeInsets.only(bottom: 50), // ปรับระยะห่างจากขอบล่างเล็กน้อย
               child: Column(
                 children: [
+                  // --- ปุ่ม Log In ---
                   SizedBox(
-                    width: 190, // ให้แคบๆ แบบในรูป
-                    height: 44,
+                    width: 220, // ขยายจาก 190 เป็น 220
+                    height: 50, // ขยายจาก 44 เป็น 50
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFFFF1C9), // ครีม
+                        backgroundColor: const Color(0xFFFFF1C9),
                         foregroundColor: Colors.black,
                         elevation: 0,
                         shape: const StadiumBorder(),
+                        textStyle: const TextStyle(
+                          fontSize: 16, // ปรับตัวอักษรให้ใหญ่ขึ้น
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -40,21 +48,28 @@ class WelcomePage extends StatelessWidget {
                       child: const Text('Log In'),
                     ),
                   ),
-                  const SizedBox(height: 10),
+
+                  const SizedBox(height: 15), // เพิ่มช่องว่างระหว่างปุ่มเล็กน้อย
+
+                  // --- ปุ่ม Sign Up ---
                   SizedBox(
-                    width: 190,
-                    height: 44,
+                    width: 220, // ขยายจาก 190 เป็น 220
+                    height: 50, // ขยายจาก 44 เป็น 50
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFF1C9),
                         foregroundColor: Colors.black,
                         elevation: 0,
                         shape: const StadiumBorder(),
+                        textStyle: const TextStyle(
+                          fontSize: 16, // ปรับตัวอักษรให้ใหญ่ขึ้น
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const SignInPage()),
+                          MaterialPageRoute(builder: (_) => const RegisterPage()),
                         );
                       },
                       child: const Text('Sign Up'),
