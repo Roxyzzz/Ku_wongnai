@@ -6,7 +6,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ดึงข้อมูล User (ถ้ามี)
+    // ดึงข้อมูล User
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
@@ -45,7 +45,6 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
-                // พากลับไปหน้า Welcome เพื่อเช็คปุ่ม Log In / Sign Up
                 Navigator.pushNamed(context, '/welcome');
               },
               child: const Text("ไปหน้า Welcome"),
