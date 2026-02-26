@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home.dart';
+// 1. ตรวจสอบว่ามีการ import ไฟล์ main_page.dart [cite: 138, 291, 435]
+import 'main_page.dart'; 
 
 class PasswordField extends StatefulWidget {
   const PasswordField({super.key, required this.controller});
@@ -83,9 +84,10 @@ class _SignInPageState extends State<SignInPage> {
         const SnackBar(content: Text('เข้าสู่ระบบสำเร็จ')),
       );
 
+      // 2. เปลี่ยนจุดหมายจาก HomePage เป็น MainPage ให้ถูกต้อง [cite: 292, 293]
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => const MainPage()),
       );
     } on FirebaseAuthException catch (e) {
       final msg = switch (e.code) {
