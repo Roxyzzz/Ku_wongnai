@@ -176,7 +176,6 @@ class _SignInPageState extends State<SignInPage> {
                 Center(
                   child: TextButton(
                     onPressed: () {
-                      // TODO: ไปหน้า Register
                     },
                     child: const Text(
                       'ยังไม่มีบัญชี? สมัครสมาชิก',

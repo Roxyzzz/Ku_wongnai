@@ -3,14 +3,51 @@ import 'package:flutter/material.dart';
 class MainPage extends StatelessWidget {
   const MainPage({super.key});
 
+  // ฟังก์ชันสำหรับแสดงรายละเอียดเมื่อกดที่ร้านอาหาร
+  void _showRestaurantDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.6,
+        padding: const EdgeInsets.all(25),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(child: Container(width: 50, height: 5, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(10)))),
+            const SizedBox(height: 20),
+            const Text('รายละเอียดร้านอาหาร', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Container(height: 150, color: Colors.grey[200], child: const Center(child: Icon(Icons.image, size: 50, color: Colors.grey))),
+            const SizedBox(height: 15),
+            const Text('ร้านอาหารตัวอย่างที่เลือก', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const Text('รายละเอียดเพิ่มเติมของร้านนี้ เช่น เมนูเด็ด เวลาเปิดปิด หรือตำแหน่งที่ตั้งของร้าน', style: TextStyle(color: Colors.grey)),
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE85B2A)),
+                onPressed: () => Navigator.pop(context),
+                child: const Text('ปิดหน้าต่าง', style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFD54F), // สีเหลือง Amber
+      backgroundColor: const Color(0xFFFFD54F),
       body: SafeArea(
         child: Column(
           children: [
-            // --- ส่วน Search และ Profile ---
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
@@ -19,15 +56,12 @@ class MainPage extends StatelessWidget {
                     child: Container(
                       height: 50,
                       padding: const EdgeInsets.symmetric(horizontal: 15),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(25),
-                      ),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25)),
                       child: const Row(
                         children: [
                           Icon(Icons.search, color: Colors.grey),
                           SizedBox(width: 10),
-                          const Text('Search', style: TextStyle(color: Colors.grey)),
+                          Text('Search', style: TextStyle(color: Colors.grey)),
                           Spacer(),
                           Icon(Icons.tune, color: Colors.orange),
                         ],
@@ -41,64 +75,47 @@ class MainPage extends StatelessWidget {
                 ],
               ),
             ),
-
-            // --- ส่วนเนื้อหาหลักพื้นหลังสีขาว ---
             Expanded(
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(40),
-                    topRight: Radius.circular(40),
-                  ),
+                  borderRadius: BorderRadius.only(topLeft: Radius.circular(40), topRight: Radius.circular(40)),
                 ),
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(25),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // --- หมวดหมู่ (Categories) ---
+                      // --- หมวดหมู่พร้อมไอคอนที่เปลี่ยนไป ---
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          CategoryItem(label: 'ทั้งหมด'),
-                          CategoryItem(label: 'ร้านอาหาร'),
-                          CategoryItem(label: 'คาเฟ่'),
-                          CategoryItem(label: 'เครื่องดื่ม'),
+                          CategoryItem(label: 'ทั้งหมด', icon: Icons.apps),
+                          CategoryItem(label: 'ร้านอาหาร', icon: Icons.restaurant),
+                          CategoryItem(label: 'คาเฟ่', icon: Icons.coffee),
+                          CategoryItem(label: 'เครื่องดื่ม', icon: Icons.local_drink),
                         ],
                       ),
                       const SizedBox(height: 30),
-
-                      // --- หัวข้อร้านอาหารแนะนำ ---
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'ร้านอาหารแนะนำ',
-                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                          TextButton(
-                            onPressed: () {},
-                            child: const Text('View All >', style: TextStyle(color: Colors.orange)),
-                          ),
+                          const Text('ร้านอาหารแนะนำ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          TextButton(onPressed: () {}, child: const Text('View All >', style: TextStyle(color: Colors.orange))),
                         ],
                       ),
                       const SizedBox(height: 10),
-
-                      // --- รายการร้านอาหาร (Grid) ---
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 15,
-                          mainAxisSpacing: 15,
-                          childAspectRatio: 0.85,
+                          crossAxisCount: 2, crossAxisSpacing: 15, mainAxisSpacing: 15, childAspectRatio: 0.85,
                         ),
                         itemCount: 6,
                         itemBuilder: (context, index) {
-                          return const RestaurantCardPlaceholder();
+                          // ส่งฟังก์ชันกดไปให้การ์ด
+                          return RestaurantCardPlaceholder(onTap: () => _showRestaurantDetails(context));
                         },
                       ),
                     ],
@@ -109,20 +126,15 @@ class MainPage extends StatelessWidget {
           ],
         ),
       ),
-      // --- แถบเมนูด้านล่าง (แก้ไขไอคอนเป็น Settings แล้ว) ---
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(20),
         height: 60,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE85B2A), // สีส้มเข้ม
-          borderRadius: BorderRadius.circular(30),
-        ),
+        decoration: BoxDecoration(color: const Color(0xFFE85B2A), borderRadius: BorderRadius.circular(30)),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Icon(Icons.home_outlined, color: Colors.white),
             Icon(Icons.favorite_border, color: Colors.white),
-            // เปลี่ยนจาก Icons.headset_mic_outlined เป็น Icons.settings_outlined
             Icon(Icons.settings_outlined, color: Colors.white), 
           ],
         ),
@@ -131,9 +143,11 @@ class MainPage extends StatelessWidget {
   }
 }
 
+// Widget สำหรับปุ่มหมวดหมู่ ปรับให้รับค่าไอคอนได้
 class CategoryItem extends StatelessWidget {
   final String label;
-  const CategoryItem({super.key, required this.label});
+  final IconData icon;
+  const CategoryItem({super.key, required this.label, required this.icon});
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +156,7 @@ class CategoryItem extends StatelessWidget {
         Container(
           width: 60, height: 60,
           decoration: BoxDecoration(color: Colors.orange[50], shape: BoxShape.circle),
-          child: const Icon(Icons.restaurant, color: Colors.orange),
+          child: Icon(icon, color: Colors.orange), // ใช้ไอคอนที่ส่งมา
         ),
         const SizedBox(height: 8),
         Text(label, style: const TextStyle(fontSize: 12)),
@@ -151,30 +165,36 @@ class CategoryItem extends StatelessWidget {
   }
 }
 
+// Widget สำหรับการ์ดร้านอาหาร เพิ่ม onTap เพื่อกดได้
 class RestaurantCardPlaceholder extends StatelessWidget {
-  const RestaurantCardPlaceholder({super.key});
+  final VoidCallback onTap;
+  const RestaurantCardPlaceholder({super.key, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[200], 
-        borderRadius: BorderRadius.circular(20)
-      ),
-      child: const Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(10),
-            child: Row(
-              children: [
-                Icon(Icons.star, color: Colors.orange, size: 16),
-                Text(' 5.0', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                Spacer(),
-                Icon(Icons.favorite, color: Colors.red, size: 16),
-              ],
+    return InkWell( // ใช้ InkWell เพื่อให้กดได้
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[200], 
+          borderRadius: BorderRadius.circular(20)
+        ),
+        child: const Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  Icon(Icons.star, color: Colors.orange, size: 16),
+                  Text(' 5.0', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                  Spacer(),
+                  Icon(Icons.favorite, color: Colors.red, size: 16),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
