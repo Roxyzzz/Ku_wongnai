@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// 1. เปลี่ยนเป็น StatefulWidget
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -10,8 +9,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  // 2. ตัวแปรเก็บหมวดหมู่ที่ถูกเลือก เริ่มต้นเป็น 'all' (ทั้งหมด)
   String selectedCategory = 'all';
+  String searchQuery = '';
 
   void _showRestaurantDetails(BuildContext context, Map<String, dynamic> data) {
     bool isFavorite = false;
@@ -104,9 +103,7 @@ class _MainPageState extends State<MainPage> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      onPressed: () {
-                        // วางปุ่มไว้เฉยๆ ยังไม่มี Action
-                      },
+                      onPressed: () {},
                       icon: const Icon(Icons.map, color: Colors.blue),
                       label: const Text('แผนที่',
                           style: TextStyle(
@@ -136,15 +133,13 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  // 3. ฟังก์ชันสำหรับสร้าง Stream ดึงข้อมูลตามหมวดหมู่
   Stream<QuerySnapshot> _getRestaurantStream() {
     CollectionReference restaurants =
         FirebaseFirestore.instance.collection('restaurants');
 
     if (selectedCategory == 'all') {
-      return restaurants.snapshots(); // ดึงทั้งหมด
+      return restaurants.snapshots();
     } else {
-      // ดึงเฉพาะที่มี category ตรงกับที่เลือก
       return restaurants
           .where('category', isEqualTo: selectedCategory)
           .snapshots();
@@ -165,18 +160,23 @@ class _MainPageState extends State<MainPage> {
                   Expanded(
                     child: Container(
                       height: 50,
-                      padding: const EdgeInsets.symmetric(horizontal: 15),
                       decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(25)),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.search, color: Colors.grey),
-                          SizedBox(width: 10),
-                          Text('Search', style: TextStyle(color: Colors.grey)),
-                          Spacer(),
-                          Icon(Icons.tune, color: Colors.orange),
-                        ],
+                      child: TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            searchQuery = value;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'Search',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          prefixIcon: Icon(Icons.search, color: Colors.grey),
+                          suffixIcon: Icon(Icons.tune, color: Colors.orange),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 15),
+                        ),
                       ),
                     ),
                   ),
@@ -201,7 +201,6 @@ class _MainPageState extends State<MainPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // --- ปรับปุ่มหมวดหมู่ให้กดได้และโชว์สถานะ ---
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
@@ -240,13 +239,10 @@ class _MainPageState extends State<MainPage> {
                         ],
                       ),
                       const SizedBox(height: 30),
-                      // เอา View All ออก เหลือแค่ชื่อหัวข้อ
                       const Text('ร้านอาหารแนะนำ',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 15), // เพิ่มระยะห่างให้ดูไม่อึดอัด
-
-                      // --- เรียกใช้ Stream ที่เราสร้างไว้ข้างบน ---
+                      const SizedBox(height: 15),
                       StreamBuilder<QuerySnapshot>(
                         stream: _getRestaurantStream(),
                         builder: (context, snapshot) {
@@ -271,6 +267,22 @@ class _MainPageState extends State<MainPage> {
                           }
 
                           var restaurants = snapshot.data!.docs;
+
+                          if (searchQuery.isNotEmpty) {
+                            restaurants = restaurants.where((doc) {
+                              var data = doc.data() as Map<String, dynamic>;
+                              var name = (data['name'] ?? '').toString().toLowerCase();
+                              return name.contains(searchQuery.toLowerCase());
+                            }).toList();
+                          }
+
+                          if (restaurants.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 20),
+                              child: Center(
+                                  child: Text('ไม่พบร้านอาหารที่ค้นหา')),
+                            );
+                          }
 
                           return GridView.builder(
                             shrinkWrap: true,
@@ -322,11 +334,10 @@ class _MainPageState extends State<MainPage> {
   }
 }
 
-// 4. ปรับ CategoryItem ให้รับค่า isSelected เพื่อเปลี่ยนสีเมื่อถูกเลือก
 class CategoryItem extends StatelessWidget {
   final String label;
   final IconData icon;
-  final bool isSelected; // รับค่าว่าโดนเลือกอยู่หรือไม่
+  final bool isSelected;
 
   const CategoryItem({
     super.key,
@@ -343,12 +354,10 @@ class CategoryItem extends StatelessWidget {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-              // เปลี่ยนสีพื้นหลังถ้าถูกเลือก
               color: isSelected ? Colors.orange : Colors.orange[50],
               shape: BoxShape.circle),
           child: Icon(
             icon,
-            // เปลี่ยนสีไอคอนถ้าถูกเลือก
             color: isSelected ? Colors.white : Colors.orange,
           ),
         ),
@@ -356,7 +365,6 @@ class CategoryItem extends StatelessWidget {
         Text(label,
             style: TextStyle(
               fontSize: 12,
-              // ทำตัวหนาถ้าถูกเลือก
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             )),
       ],
