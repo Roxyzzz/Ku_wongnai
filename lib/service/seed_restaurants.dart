@@ -7,7 +7,7 @@ final List<Map<String, dynamic>> kuRestaurants = [
     "category": "food",
     "imageUrl": "",
     "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
-    "openTime": "08.00",
+    "openTime": "08:00",
     "closeTime": "17:00",
     "avgRating": 0,
     "ratingCount": 0,
@@ -293,9 +293,36 @@ final List<Map<String, dynamic>> kuRestaurants = [
   },
 ];
 
+String generateDocId(String name) {
+  return name
+      .toLowerCase()
+      .trim()
+      .replaceAll(RegExp(r'\s+'), '')
+      .replaceAll(RegExp(r'[^\u0E00-\u0E7Fa-z0-9]'), '');
+}
+
 Future<void> seedRestaurants() async {
-  final col = FirebaseFirestore.instance.collection('food'); 
+  final col = FirebaseFirestore.instance.collection('restaurants');
+
   for (final r in kuRestaurants) {
-    await col.add(r);
+    final name = r['name'] as String;
+    final id = generateDocId(name);
+
+    final data = {
+      ...r,
+
+      // 🔥 เพิ่ม field ใหม่
+      "latitude": null,      // double?
+      "longitude": null,     // double?
+      "location": null,      // GeoPoint?
+      "googleMapsUrl": null, // String?
+
+      "createdAt": FieldValue.serverTimestamp(),
+      "updatedAt": FieldValue.serverTimestamp(),
+    };
+
+    await col.doc(id).set(data); // ไม่มี merge
   }
+
+  print("✅ Restaurants collection created successfully");
 }
