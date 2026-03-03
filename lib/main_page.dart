@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class MainPage extends StatelessWidget {
+// 1. เปลี่ยนเป็น StatefulWidget
+class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
-  // ฟังก์ชันสำหรับแสดงรายละเอียดเมื่อกดที่ร้านอาหาร
-  void _showRestaurantDetails(BuildContext context) {
-    // สร้างตัวแปรเก็บสถานะการถูกใจ (เริ่มต้นเป็น false คือยังไม่กด)
-    bool isFavorite = false; 
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  // 2. ตัวแปรเก็บหมวดหมู่ที่ถูกเลือก เริ่มต้นเป็น 'all' (ทั้งหมด)
+  String selectedCategory = 'all';
+
+  void _showRestaurantDetails(BuildContext context, Map<String, dynamic> data) {
+    bool isFavorite = false;
+
+    String name = data['name'] ?? 'ไม่มีชื่อร้าน';
+    String desc = data['desc'] ?? 'ไม่มีรายละเอียด';
+    String imageUrl = data['imageUrl'] ?? '';
+    String openTime = data['openTime'] ?? '-';
+    String closeTime = data['closeTime'] ?? '-';
 
     showModalBottomSheet(
       context: context,
@@ -14,75 +28,127 @@ class MainPage extends StatelessWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      builder: (context) => StatefulBuilder( // ใช้ StatefulBuilder เพื่อให้ setState ภายใน Pop-up ได้
-        builder: (BuildContext context, StateSetter setState) {
-          return Container(
-            height: MediaQuery.of(context).size.height * 0.6,
-            padding: const EdgeInsets.all(25),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                    child: Container(
-                        width: 50,
-                        height: 5,
-                        decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(10)))),
-                const SizedBox(height: 20),
-                const Text('รายละเอียดร้านอาหาร',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
-                Container(
-                    height: 150,
-                    color: Colors.grey[200],
-                    child: const Center(
-                        child: Icon(Icons.image, size: 50, color: Colors.grey))),
-                const SizedBox(height: 15),
-                
-                // --- ส่วนปุ่มหัวใจที่กดแล้วเปลี่ยนสถานะได้ ---
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('ร้านอาหารตัวอย่างที่เลือก',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                    IconButton(
-                      onPressed: () {
-                        setState(() {
-                          isFavorite = !isFavorite; // สลับสถานะเมื่อกด
-                        });
-                      },
-                      // ตรวจสอบเงื่อนไข: ถ้า isFavorite เป็น true ให้เป็นไอคอนทึบ ถ้า false ให้เป็นโปร่ง
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border, 
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
+      builder: (context) => StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.65,
+          padding: const EdgeInsets.all(25),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                  child: Container(
+                      width: 50,
+                      height: 5,
+                      decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(10)))),
+              const SizedBox(height: 20),
+              const Text('รายละเอียดร้านอาหาร',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Container(
+                height: 150,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Colors.grey[200],
+                  borderRadius: BorderRadius.circular(15),
+                  image: imageUrl.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(imageUrl),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                // ------------------------------------------------
-                
-                const Text(
-                    'รายละเอียดเพิ่มเติมของร้านนี้ เช่น เมนูเด็ด เวลาเปิดปิด หรือตำแหน่งที่ตั้งของร้าน',
-                    style: TextStyle(color: Colors.grey)),
-                const Spacer(),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE85B2A)),
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text('ปิดหน้าต่าง',
-                        style: TextStyle(color: Colors.white)),
+                child: imageUrl.isEmpty
+                    ? const Center(
+                        child: Icon(Icons.image, size: 50, color: Colors.grey))
+                    : null,
+              ),
+              const SizedBox(height: 15),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(name,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.w600),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis),
                   ),
-                ),
-              ],
-            ),
-          );
-        }
-      ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        isFavorite = !isFavorite;
+                      });
+                    },
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+              Text('เวลาทำการ: $openTime - $closeTime',
+                  style: const TextStyle(color: Colors.orange, fontSize: 13)),
+              const SizedBox(height: 8),
+              Text(desc, style: const TextStyle(color: Colors.grey)),
+              const Spacer(),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        side: const BorderSide(color: Colors.blue),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () {
+                        // วางปุ่มไว้เฉยๆ ยังไม่มี Action
+                      },
+                      icon: const Icon(Icons.map, color: Colors.blue),
+                      label: const Text('แผนที่',
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE85B2A),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('ปิดหน้าต่าง',
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }),
     );
+  }
+
+  // 3. ฟังก์ชันสำหรับสร้าง Stream ดึงข้อมูลตามหมวดหมู่
+  Stream<QuerySnapshot> _getRestaurantStream() {
+    CollectionReference restaurants =
+        FirebaseFirestore.instance.collection('restaurants');
+
+    if (selectedCategory == 'all') {
+      return restaurants.snapshots(); // ดึงทั้งหมด
+    } else {
+      // ดึงเฉพาะที่มี category ตรงกับที่เลือก
+      return restaurants
+          .where('category', isEqualTo: selectedCategory)
+          .snapshots();
+    }
   }
 
   @override
@@ -135,45 +201,98 @@ class MainPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Row(
+                      // --- ปรับปุ่มหมวดหมู่ให้กดได้และโชว์สถานะ ---
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          CategoryItem(label: 'ทั้งหมด', icon: Icons.apps),
-                          CategoryItem(
-                              label: 'ร้านอาหาร', icon: Icons.restaurant),
-                          CategoryItem(label: 'คาเฟ่', icon: Icons.coffee),
-                          CategoryItem(
-                              label: 'เครื่องดื่ม', icon: Icons.local_drink),
+                          GestureDetector(
+                            onTap: () =>
+                                setState(() => selectedCategory = 'all'),
+                            child: CategoryItem(
+                                label: 'ทั้งหมด',
+                                icon: Icons.apps,
+                                isSelected: selectedCategory == 'all'),
+                          ),
+                          GestureDetector(
+                            onTap: () =>
+                                setState(() => selectedCategory = 'food'),
+                            child: CategoryItem(
+                                label: 'ร้านอาหาร',
+                                icon: Icons.restaurant,
+                                isSelected: selectedCategory == 'food'),
+                          ),
+                          GestureDetector(
+                            onTap: () =>
+                                setState(() => selectedCategory = 'cafe'),
+                            child: CategoryItem(
+                                label: 'คาเฟ่',
+                                icon: Icons.coffee,
+                                isSelected: selectedCategory == 'cafe'),
+                          ),
+                          GestureDetector(
+                            onTap: () =>
+                                setState(() => selectedCategory = 'drink'),
+                            child: CategoryItem(
+                                label: 'เครื่องดื่ม',
+                                icon: Icons.local_drink,
+                                isSelected: selectedCategory == 'drink'),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 30),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('ร้านอาหารแนะนำ',
-                              style: TextStyle(
-                                  fontSize: 20, fontWeight: FontWeight.bold)),
-                          TextButton(
-                              onPressed: () {},
-                              child: const Text('View All >',
-                                  style: TextStyle(color: Colors.orange))),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 15,
-                          mainAxisSpacing: 15,
-                          childAspectRatio: 0.85,
-                        ),
-                        itemCount: 6,
-                        itemBuilder: (context, index) {
-                          return RestaurantCardPlaceholder(
-                              onTap: () => _showRestaurantDetails(context));
+                      // เอา View All ออก เหลือแค่ชื่อหัวข้อ
+                      const Text('ร้านอาหารแนะนำ',
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 15), // เพิ่มระยะห่างให้ดูไม่อึดอัด
+
+                      // --- เรียกใช้ Stream ที่เราสร้างไว้ข้างบน ---
+                      StreamBuilder<QuerySnapshot>(
+                        stream: _getRestaurantStream(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+
+                          if (snapshot.hasError) {
+                            return const Center(
+                                child: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล'));
+                          }
+
+                          if (!snapshot.hasData ||
+                              snapshot.data!.docs.isEmpty) {
+                            return const Padding(
+                              padding: EdgeInsets.only(top: 20),
+                              child: Center(
+                                  child: Text('ไม่มีข้อมูลในหมวดหมู่นี้')),
+                            );
+                          }
+
+                          var restaurants = snapshot.data!.docs;
+
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 15,
+                              mainAxisSpacing: 15,
+                              childAspectRatio: 0.85,
+                            ),
+                            itemCount: restaurants.length,
+                            itemBuilder: (context, index) {
+                              var data = restaurants[index].data()
+                                  as Map<String, dynamic>;
+                              return RestaurantCardPlaceholder(
+                                data: data,
+                                onTap: () =>
+                                    _showRestaurantDetails(context, data),
+                              );
+                            },
+                          );
                         },
                       ),
                     ],
@@ -203,10 +322,18 @@ class MainPage extends StatelessWidget {
   }
 }
 
+// 4. ปรับ CategoryItem ให้รับค่า isSelected เพื่อเปลี่ยนสีเมื่อถูกเลือก
 class CategoryItem extends StatelessWidget {
   final String label;
   final IconData icon;
-  const CategoryItem({super.key, required this.label, required this.icon});
+  final bool isSelected; // รับค่าว่าโดนเลือกอยู่หรือไม่
+
+  const CategoryItem({
+    super.key,
+    required this.label,
+    required this.icon,
+    this.isSelected = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -216,11 +343,22 @@ class CategoryItem extends StatelessWidget {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-              color: Colors.orange[50], shape: BoxShape.circle),
-          child: Icon(icon, color: Colors.orange),
+              // เปลี่ยนสีพื้นหลังถ้าถูกเลือก
+              color: isSelected ? Colors.orange : Colors.orange[50],
+              shape: BoxShape.circle),
+          child: Icon(
+            icon,
+            // เปลี่ยนสีไอคอนถ้าถูกเลือก
+            color: isSelected ? Colors.white : Colors.orange,
+          ),
         ),
         const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 12)),
+        Text(label,
+            style: TextStyle(
+              fontSize: 12,
+              // ทำตัวหนาถ้าถูกเลือก
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            )),
       ],
     );
   }
@@ -228,28 +366,63 @@ class CategoryItem extends StatelessWidget {
 
 class RestaurantCardPlaceholder extends StatelessWidget {
   final VoidCallback onTap;
-  const RestaurantCardPlaceholder({super.key, required this.onTap});
+  final Map<String, dynamic> data;
+
+  const RestaurantCardPlaceholder(
+      {super.key, required this.onTap, required this.data});
 
   @override
   Widget build(BuildContext context) {
+    String name = data['name'] ?? 'ไม่มีชื่อ';
+    String rating = data['avgRating']?.toString() ?? '0.0';
+    String imageUrl = data['imageUrl'] ?? '';
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
       child: Container(
         decoration: BoxDecoration(
-            color: Colors.grey[200], borderRadius: BorderRadius.circular(20)),
-        child: const Stack(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(20),
+          image: imageUrl.isNotEmpty
+              ? DecorationImage(
+                  image: NetworkImage(imageUrl),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.3), BlendMode.darken))
+              : null,
+        ),
+        child: Stack(
           children: [
             Padding(
-              padding: EdgeInsets.all(10),
-              child: Row(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.star, color: Colors.orange, size: 16),
-                  Text(' 5.0',
-                      style:
-                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                  Spacer(),
-                  Icon(Icons.favorite, color: Colors.red, size: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.orange, size: 16),
+                      Text(' $rating',
+                          style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: imageUrl.isNotEmpty
+                                  ? Colors.white
+                                  : Colors.black)),
+                      const Spacer(),
+                      const Icon(Icons.favorite, color: Colors.red, size: 16),
+                    ],
+                  ),
+                  const Spacer(),
+                  Text(
+                    name,
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color:
+                            imageUrl.isNotEmpty ? Colors.white : Colors.black),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  )
                 ],
               ),
             ),
