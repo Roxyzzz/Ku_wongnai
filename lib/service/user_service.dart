@@ -20,6 +20,7 @@ class UserService {
       throw Exception('Create user failed (user is null)');
     }
 
+    // 2) Save user data to Firestore
     await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
       'uid': user.uid,
       'email': user.email,
@@ -27,6 +28,7 @@ class UserService {
       'address': address.trim(),
       'registeredAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
+      'favoriteRestaurants': [], 
     });
   }
 }
