@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'firebase_options.dart';
 import 'home.dart';
 import 'welcome.dart';
 import 'signin.dart';
 import 'register.dart';
+import 'service/seed_page.dart';
 
-void main() async {
-  // 1. ตรวจสอบการเชื่อมต่อกับระบบพื้นฐานของ Flutter
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 2. เริ่มต้นระบบ Firebase (ถ้าไฟล์นี้ Error ให้รัน flutterfire configure ใน terminal)
+
+  const accessToken = String.fromEnvironment('ACCESS_TOKEN');
+  MapboxOptions.setAccessToken(accessToken);
+  // ✅ init Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   runApp(const MyApp());
 }
 
@@ -26,12 +29,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'KU Wongnai',
-      initialRoute: '/home', 
+      initialRoute: '/home',
       routes: {
         '/home': (context) => const HomePage(),
         '/welcome': (context) => const WelcomePage(),
         '/signin': (context) => const SignInPage(),
         '/register': (context) => const RegisterPage(),
+        '/seed': (context) => const SeedPage(),
       },
     );
   }

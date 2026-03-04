@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'map_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -20,6 +21,8 @@ class _MainPageState extends State<MainPage> {
     String imageUrl = data['imageUrl'] ?? '';
     String openTime = data['openTime'] ?? '-';
     String closeTime = data['closeTime'] ?? '-';
+    final lat = (data['latitude'] as num?)?.toDouble();
+  final lng = (data['longitude'] as num?)?.toDouble();
 
     showModalBottomSheet(
       context: context,
@@ -103,7 +106,14 @@ class _MainPageState extends State<MainPage> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(context, MaterialPageRoute( builder: (_) => RouteMapPage(destName: name, destLat: lat!, destLng: lng!
+                        ),
+                        ),
+                        );
+                      },
+
                       icon: const Icon(Icons.map, color: Colors.blue),
                       label: const Text('แผนที่',
                           style: TextStyle(
