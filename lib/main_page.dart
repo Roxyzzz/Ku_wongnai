@@ -3,7 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'map_page.dart';
 import 'feature/favorite_button.dart'; 
-import 'like_restaurant.dart'; // เพิ่ม import หน้าร้านที่ถูกใจเข้ามา
+import 'feature/rating_button.dart'; // 1. นำเข้าปุ่มให้คะแนนที่เราแยกไฟล์ไว้
+import 'like_restaurant.dart'; 
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -17,6 +18,8 @@ class _MainPageState extends State<MainPage> {
   String searchQuery = '';
   
   String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
+
+  // 2. ลบฟังก์ชัน Pop-up อันยาวๆ ทิ้งไปเลย เพราะย้ายไปอยู่ในไฟล์ rating_button.dart แล้ว!
 
   void _showRestaurantDetails(BuildContext context, Map<String, dynamic> data, String restaurantId) {
     String name = data['name'] ?? 'ไม่มีชื่อร้าน';
@@ -36,7 +39,7 @@ class _MainPageState extends State<MainPage> {
       builder: (context) => StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
         return Container(
-          height: MediaQuery.of(context).size.height * 0.65,
+          height: MediaQuery.of(context).size.height * 0.70, 
           padding: const EdgeInsets.all(25),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,6 +95,16 @@ class _MainPageState extends State<MainPage> {
               const SizedBox(height: 8),
               Text(desc, style: const TextStyle(color: Colors.grey)),
               const Spacer(),
+              
+              // 3. --- เรียกใช้งาน Component ปุ่มให้คะแนนตรงนี้! โค้ดสั้นและสะอาดมาก ---
+              RatingButton(
+                restaurantId: restaurantId,
+                restaurantName: name,
+                currentUserId: currentUserId,
+              ),
+              const SizedBox(height: 10),
+              // -------------------------------------------------------------
+
               Row(
                 children: [
                   Expanded(
@@ -319,7 +332,6 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
       ),
-      // --- ปรับแก้แถบเมนูด้านล่างตรงนี้ครับ ---
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(20),
         height: 60,
@@ -329,18 +341,13 @@ class _MainPageState extends State<MainPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // ปุ่ม Home
             IconButton(
               icon: const Icon(Icons.home, color: Colors.white),
-              onPressed: () {
-                // อยู่หน้า Home อยู่แล้ว ไม่ต้องทำอะไร
-              },
+              onPressed: () {},
             ),
-            // ปุ่ม Favorite
             IconButton(
               icon: const Icon(Icons.favorite_border, color: Colors.white),
               onPressed: () {
-                // เปลี่ยนไปหน้า LikeRestaurantPage แบบปิด Animation
                 Navigator.push(
                   context,
                   PageRouteBuilder(
@@ -351,17 +358,13 @@ class _MainPageState extends State<MainPage> {
                 );
               },
             ),
-            // ปุ่ม Settings
             IconButton(
               icon: const Icon(Icons.settings_outlined, color: Colors.white),
-              onPressed: () {
-                // โค้ดไปหน้าตั้งค่าในอนาคต
-              },
+              onPressed: () {},
             ),
           ],
         ),
       ),
-      // ------------------------------------------
     );
   }
 }
