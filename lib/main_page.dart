@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'map_page.dart';
+import 'feature/favorite_button.dart'; 
+import 'like_restaurant.dart'; // เพิ่ม import หน้าร้านที่ถูกใจเข้ามา
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -12,17 +15,17 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   String selectedCategory = 'all';
   String searchQuery = '';
+  
+  String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  void _showRestaurantDetails(BuildContext context, Map<String, dynamic> data) {
-    bool isFavorite = false;
-
+  void _showRestaurantDetails(BuildContext context, Map<String, dynamic> data, String restaurantId) {
     String name = data['name'] ?? 'ไม่มีชื่อร้าน';
     String desc = data['desc'] ?? 'ไม่มีรายละเอียด';
     String imageUrl = data['imageUrl'] ?? '';
     String openTime = data['openTime'] ?? '-';
     String closeTime = data['closeTime'] ?? '-';
     final lat = (data['latitude'] as num?)?.toDouble();
-  final lng = (data['longitude'] as num?)?.toDouble();
+    final lng = (data['longitude'] as num?)?.toDouble();
 
     showModalBottomSheet(
       context: context,
@@ -78,16 +81,9 @@ class _MainPageState extends State<MainPage> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis),
                   ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        isFavorite = !isFavorite;
-                      });
-                    },
-                    icon: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: Colors.red,
-                    ),
+                  FavoriteButton(
+                    restaurantId: restaurantId,
+                    currentUserId: currentUserId,
                   ),
                 ],
               ),
@@ -108,12 +104,10 @@ class _MainPageState extends State<MainPage> {
                       ),
                       onPressed: () {
                         Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute( builder: (_) => RouteMapPage(destName: name, destLat: lat!, destLng: lng!
-                        ),
-                        ),
-                        );
+                        if (lat != null && lng != null) {
+                           Navigator.push(context, MaterialPageRoute( builder: (_) => RouteMapPage(destName: name, destLat: lat, destLng: lng)));
+                        }
                       },
-
                       icon: const Icon(Icons.map, color: Colors.blue),
                       label: const Text('แผนที่',
                           style: TextStyle(
@@ -306,12 +300,12 @@ class _MainPageState extends State<MainPage> {
                             ),
                             itemCount: restaurants.length,
                             itemBuilder: (context, index) {
-                              var data = restaurants[index].data()
-                                  as Map<String, dynamic>;
+                              var doc = restaurants[index]; 
+                              var data = doc.data() as Map<String, dynamic>;
                               return RestaurantCardPlaceholder(
                                 data: data,
                                 onTap: () =>
-                                    _showRestaurantDetails(context, data),
+                                    _showRestaurantDetails(context, data, doc.id), 
                               );
                             },
                           );
@@ -325,21 +319,49 @@ class _MainPageState extends State<MainPage> {
           ],
         ),
       ),
+      // --- ปรับแก้แถบเมนูด้านล่างตรงนี้ครับ ---
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(20),
         height: 60,
         decoration: BoxDecoration(
             color: const Color(0xFFE85B2A),
             borderRadius: BorderRadius.circular(30)),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Icon(Icons.home_outlined, color: Colors.white),
-            Icon(Icons.favorite_border, color: Colors.white),
-            Icon(Icons.settings_outlined, color: Colors.white),
+            // ปุ่ม Home
+            IconButton(
+              icon: const Icon(Icons.home, color: Colors.white),
+              onPressed: () {
+                // อยู่หน้า Home อยู่แล้ว ไม่ต้องทำอะไร
+              },
+            ),
+            // ปุ่ม Favorite
+            IconButton(
+              icon: const Icon(Icons.favorite_border, color: Colors.white),
+              onPressed: () {
+                // เปลี่ยนไปหน้า LikeRestaurantPage แบบปิด Animation
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (context, animation1, animation2) => const LikeRestaurantPage(),
+                    transitionDuration: Duration.zero,
+                    reverseTransitionDuration: Duration.zero,
+                  ),
+                );
+              },
+            ),
+            // ปุ่ม Settings
+            IconButton(
+              icon: const Icon(Icons.settings_outlined, color: Colors.white),
+              onPressed: () {
+                // โค้ดไปหน้าตั้งค่าในอนาคต
+              },
+            ),
           ],
         ),
       ),
+      // ------------------------------------------
     );
   }
 }
