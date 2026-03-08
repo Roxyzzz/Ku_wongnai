@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'map_page.dart';
 import 'feature/favorite_button.dart'; 
-import 'feature/rating_button.dart'; // 1. นำเข้าปุ่มให้คะแนนที่เราแยกไฟล์ไว้
+import 'feature/rating_button.dart'; 
 import 'like_restaurant.dart'; 
 import 'profile_page.dart';
 
@@ -19,8 +19,6 @@ class _MainPageState extends State<MainPage> {
   String searchQuery = '';
   
   String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
-
-  // 2. ลบฟังก์ชัน Pop-up อันยาวๆ ทิ้งไปเลย เพราะย้ายไปอยู่ในไฟล์ rating_button.dart แล้ว!
 
   void _showRestaurantDetails(BuildContext context, Map<String, dynamic> data, String restaurantId) {
     String name = data['name'] ?? 'ไม่มีชื่อร้าน';
@@ -97,14 +95,12 @@ class _MainPageState extends State<MainPage> {
               Text(desc, style: const TextStyle(color: Colors.grey)),
               const Spacer(),
               
-              // 3. --- เรียกใช้งาน Component ปุ่มให้คะแนนตรงนี้! โค้ดสั้นและสะอาดมาก ---
               RatingButton(
                 restaurantId: restaurantId,
                 restaurantName: name,
                 currentUserId: currentUserId,
               ),
               const SizedBox(height: 10),
-              // -------------------------------------------------------------
 
               Row(
                 children: [
@@ -202,7 +198,7 @@ class _MainPageState extends State<MainPage> {
                   const Icon(Icons.notifications_none, color: Colors.white),
                   const SizedBox(width: 10),
                   IconButton(onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage(),
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage(),
                     ),);
                   } , icon: const Icon(Icons.person_outline , color: Colors.white,))
                 ],
@@ -364,7 +360,13 @@ class _MainPageState extends State<MainPage> {
             ),
             IconButton(
               icon: const Icon(Icons.settings_outlined, color: Colors.white),
-              onPressed: () {},
+              onPressed: () {
+                // ถ้าอยากให้ปุ่มเฟืองไปหน้า ProfilePage ด้วย ก็เพิ่ม Navigator ตรงนี้ได้เลยครับ
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const ProfilePage()),
+                );
+              },
             ),
           ],
         ),
@@ -456,8 +458,7 @@ class RestaurantCardPlaceholder extends StatelessWidget {
                               color: imageUrl.isNotEmpty
                                   ? Colors.white
                                   : Colors.black)),
-                      const Spacer(),
-                      const Icon(Icons.favorite, color: Colors.red, size: 16),
+                      // ❌ เอา Spacer กับหัวใจออกไปแล้ว
                     ],
                   ),
                   const Spacer(),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home.dart';
 import 'service/user_service.dart';
+import 'main_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -14,7 +14,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
 
   final nameCtrl = TextEditingController();
-  final addressCtrl = TextEditingController();
+  // ลบ addressCtrl ออกไปแล้ว
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   final confirmPassCtrl = TextEditingController();
@@ -25,7 +25,6 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void dispose() {
     nameCtrl.dispose();
-    addressCtrl.dispose();
     emailCtrl.dispose();
     passCtrl.dispose();
     confirmPassCtrl.dispose();
@@ -42,7 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
         email: emailCtrl.text,
         password: passCtrl.text,
         name: nameCtrl.text,
-        address: addressCtrl.text,
+        address: '', // ✅ ส่งค่าว่างไปแทน จะได้ไม่ต้องแก้โค้ดฝั่ง Backend
       );
 
       if (!mounted) return;
@@ -51,9 +50,10 @@ class _RegisterPageState extends State<RegisterPage> {
         const SnackBar(content: Text('สร้างบัญชี + บันทึกข้อมูลสำเร็จ')),
       );
 
+      // ✅ 2. เปลี่ยนให้เด้งไป MainPage แทน HomePage
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => const MainPage()),
       );
     } on FirebaseAuthException catch (e) {
       final msg = switch (e.code) {
@@ -94,6 +94,7 @@ class _RegisterPageState extends State<RegisterPage> {
         title: const Text("Sign Up"),
         centerTitle: true,
         elevation: 0,
+        backgroundColor: Colors.transparent, // ปรับให้กลืนกับพื้นหลังถ้าต้องการ
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -111,15 +112,6 @@ class _RegisterPageState extends State<RegisterPage> {
                   decoration: _inputDeco('ชื่อ-นามสกุล'),
                   validator: (v) =>
                       (v == null || v.trim().isEmpty) ? 'กรุณากรอกชื่อ' : null,
-                ),
-                const SizedBox(height: 16),
-
-                // Address
-                const Text('Address', style: TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: addressCtrl,
-                  decoration: _inputDeco('ที่อยู่'),
                 ),
                 const SizedBox(height: 16),
 
@@ -155,18 +147,19 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Confirm
+                // Confirm Password
                 const Text('Confirm Password', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: confirmPassCtrl,
                   obscureText: true,
-                  decoration: _inputDeco('confirm password'),
+                  decoration: _inputDeco('ยืนยันรหัสผ่านอีกครั้ง'),
                   validator: (v) => v != passCtrl.text ? 'รหัสผ่านไม่ตรงกัน' : null,
                 ),
 
                 const SizedBox(height: 32),
 
+                // ปุ่มสมัคร
                 SizedBox(
                   width: double.infinity,
                   height: 52,

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'firebase_options.dart';
-import 'home.dart';
 import 'welcome.dart';
 import 'signin.dart';
 import 'register.dart';
 import 'service/seed_page.dart';
+import 'main_page.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,9 +29,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'KU Wongnai',
-      initialRoute: '/home',
+      initialRoute: '/welcome', 
       routes: {
-        '/home': (context) => const HomePage(),
+        '/home': (context) => const MainPage(), 
         '/welcome': (context) => const WelcomePage(),
         '/signin': (context) => const SignInPage(),
         '/register': (context) => const RegisterPage(),
