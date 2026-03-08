@@ -5,6 +5,7 @@ import 'map_page.dart';
 import 'feature/favorite_button.dart'; 
 import 'feature/rating_button.dart'; // 1. นำเข้าปุ่มให้คะแนนที่เราแยกไฟล์ไว้
 import 'like_restaurant.dart'; 
+import 'profile_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -200,7 +201,10 @@ class _MainPageState extends State<MainPage> {
                   const SizedBox(width: 15),
                   const Icon(Icons.notifications_none, color: Colors.white),
                   const SizedBox(width: 10),
-                  const Icon(Icons.person_outline, color: Colors.white),
+                  IconButton(onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => ProfilePage(),
+                    ),);
+                  } , icon: const Icon(Icons.person_outline , color: Colors.white,))
                 ],
               ),
             ),
