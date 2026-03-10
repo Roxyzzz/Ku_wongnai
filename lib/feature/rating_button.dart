@@ -13,7 +13,6 @@ class RatingButton extends StatelessWidget {
     required this.currentUserId,
   });
 
-  // ย้ายฟังก์ชัน Pop-up มาไว้ในไฟล์นี้
   void _showRatingBottomSheet(BuildContext context) {
     int currentRating = 0; 
 
@@ -73,18 +72,6 @@ class RatingButton extends StatelessWidget {
                   ),
                   const SizedBox(height: 25),
 
-                  TextField(
-                    maxLines: 3,
-                    decoration: InputDecoration(
-                      hintText: 'เขียนรีวิวเพิ่มเติม (ไม่บังคับ)...',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-                    ),
-                  ),
-                  const SizedBox(height: 25),
-
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -97,7 +84,7 @@ class RatingButton extends StatelessWidget {
                       onPressed: currentRating == 0 
                         ? null 
                         : () async {
-                            Navigator.pop(context); // ปิดหน้าต่าง Popup
+                            Navigator.pop(context); 
 
                             if (currentUserId.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('กรุณาล็อกอินก่อนให้คะแนน')));
@@ -163,7 +150,6 @@ class RatingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // โค้ดสร้างปุ่มโชว์ในหน้ารายละเอียดร้าน
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
@@ -175,8 +161,8 @@ class RatingButton extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         onPressed: () {
-          Navigator.pop(context); // ปิดหน้ารายละเอียดร้านก่อน
-          _showRatingBottomSheet(context); // เรียกหน้าให้คะแนนขึ้นมาแทน
+          Navigator.pop(context); 
+          _showRatingBottomSheet(context); 
         },
         icon: const Icon(Icons.star_rate_rounded),
         label: const Text('ให้คะแนนร้านนี้', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),

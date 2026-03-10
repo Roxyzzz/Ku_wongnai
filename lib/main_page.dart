@@ -458,7 +458,6 @@ class RestaurantCardPlaceholder extends StatelessWidget {
                               color: imageUrl.isNotEmpty
                                   ? Colors.white
                                   : Colors.black)),
-                      // ❌ เอา Spacer กับหัวใจออกไปแล้ว
                     ],
                   ),
                   const Spacer(),
