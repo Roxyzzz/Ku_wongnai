@@ -8,7 +8,6 @@ String generateDocId(String name) {
       .replaceAll(RegExp(r'[^\u0E00-\u0E7Fa-z0-9]'), '');
 }
 
-// 🔥 ใส่พิกัดที่มี
 final Map<String, ({double lat, double lng})> kuCoords = {
   "ม่าม่าพร": (lat: 13.844501062790398, lng: 100.56921213266581),
   "โรงอาหารกลาง 1 (บาร์ใหม่)": (lat: 13.848908754331225, lng: 100.56711001534337),

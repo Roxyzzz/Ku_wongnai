@@ -145,5 +145,4 @@ Future<void> seedRestaurants() async {
     }
   }
 
-  print("✅ Restaurants collection updated successfully with stable links");
 }

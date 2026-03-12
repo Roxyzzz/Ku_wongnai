@@ -11,19 +11,17 @@ class SeedPage extends StatefulWidget {
 class _SeedPageState extends State<SeedPage> {
   bool _isLoading = false;
 
-  // ฟังก์ชันหลักสำหรับส่งข้อมูลขึ้น Firebase
   Future<void> _handleUpload() async {
     setState(() => _isLoading = true);
 
     try {
-      // เรียกฟังก์ชันจากไฟล์ seed_restaurants.dart
       await seedRestaurants();
 
       if (!mounted) return;
       
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('✅ อัปโหลดข้อมูลร้านอาหารสำเร็จ!'),
+          content: Text('สำเร็จ!'),
           backgroundColor: Colors.green,
           behavior: SnackBarBehavior.floating,
         ),
@@ -33,7 +31,7 @@ class _SeedPageState extends State<SeedPage> {
       
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('❌ เกิดข้อผิดพลาด: $e'),
+          content: Text(' ผิดพลาด: $e'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -65,7 +63,6 @@ class _SeedPageState extends State<SeedPage> {
             ),
             const SizedBox(height: 40),
             
-            // ปุ่มอัปโหลดที่ปรับปรุงแล้ว
             ElevatedButton.icon(
               onPressed: _isLoading ? null : _handleUpload,
               style: ElevatedButton.styleFrom(

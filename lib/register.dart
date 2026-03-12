@@ -14,7 +14,6 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
 
   final nameCtrl = TextEditingController();
-  // ลบ addressCtrl ออกไปแล้ว
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   final confirmPassCtrl = TextEditingController();
@@ -127,7 +126,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 ),
                 const SizedBox(height: 16),
 
-                // Password
+              
                 const Text('Password', style: TextStyle(fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 TextFormField(
@@ -159,7 +158,6 @@ class _RegisterPageState extends State<RegisterPage> {
 
                 const SizedBox(height: 32),
 
-                // ปุ่มสมัคร
                 SizedBox(
                   width: double.infinity,
                   height: 52,

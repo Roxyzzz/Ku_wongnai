@@ -61,14 +61,10 @@ class _RouteMapPageState extends State<RouteMapPage> {
     super.dispose();
   }
 
-  // ป้องกันแอปค้างถ้าหาไฟล์รูปไม่เจอ
   Future<void> _loadMarkerSafe() async {
-    try {
       final byteData = await rootBundle.load('assets/images/marker.png');
       _markerBytes = byteData.buffer.asUint8List();
-    } catch (e) {
-      debugPrint("ไม่พบรูป marker.png: จะใช้ Marker เริ่มต้นแทน");
-    }
+
   }
 
   @override
@@ -77,7 +73,6 @@ class _RouteMapPageState extends State<RouteMapPage> {
       backgroundColor: const Color(0xFFF7F7F7),
       body: Stack(
         children: [
-          // ===== 1. Fullscreen Map =====
           MapWidget(
             key: const ValueKey("routeMap"),
             styleUri: MapboxStyles.MAPBOX_STREETS,
@@ -85,7 +80,7 @@ class _RouteMapPageState extends State<RouteMapPage> {
               center: Point(
                 coordinates: Position(widget.destLng, widget.destLat),
               ),
-              zoom: 14.5, // ซูมออกนิดนึงให้เห็นภาพรวม
+              zoom: 14.5, 
             ),
             onMapCreated: (map) async {
               _map = map;
@@ -101,7 +96,6 @@ class _RouteMapPageState extends State<RouteMapPage> {
             },
           ),
 
-          // ===== 2. Top Header (ปุ่ม Back & My Location) =====
           Positioned(
             top: MediaQuery.of(context).padding.top + 10,
             left: 16,
@@ -132,7 +126,6 @@ class _RouteMapPageState extends State<RouteMapPage> {
             ),
           ),
 
-          // ===== 3. Bottom Info Card (ข้อมูลเส้นทางแบบคลีนๆ) =====
           Positioned(
             bottom: MediaQuery.of(context).padding.bottom + 20,
             left: 16,
@@ -149,18 +142,16 @@ class _RouteMapPageState extends State<RouteMapPage> {
     );
   }
 
-  // รวบรวมคำสั่งหลังโหลด Map เสร็จไว้ด้วยกัน
   Future<void> _initializeRouteAndLocation() async {
     final myPos = await _getCurrentPositionSafe();
     if (myPos == null) {
       if (mounted) setState(() => _loadingRoute = false);
-      return; // หาสถานที่ไม่ได้ (อาจจะเพราะไม่เปิด GPS)
+      return;
     }
 
     await _placeMarkers(myPos);
     await _safeDrawRoute(fromLat: myPos.latitude, fromLng: myPos.longitude);
 
-    // ซูมให้อยู่กึ่งกลางระหว่างเรากับร้าน
     final midLat = (myPos.latitude + widget.destLat) / 2;
     final midLng = (myPos.longitude + widget.destLng) / 2;
     await _map?.flyTo(
@@ -174,7 +165,6 @@ class _RouteMapPageState extends State<RouteMapPage> {
     _startLocationUpdates();
   }
 
-  // ป้องกันการค้างโดยใส่ Timeout 5 วินาที
   Future<geo.Position?> _getCurrentPositionSafe() async {
     bool serviceEnabled = await geo.Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return null;
@@ -188,13 +178,11 @@ class _RouteMapPageState extends State<RouteMapPage> {
     }
 
     try {
-      // ใส่เวลาจำกัด (Timeout) ป้องกันแอปค้าง
       return await geo.Geolocator.getCurrentPosition(
         desiredAccuracy: geo.LocationAccuracy.high,
         timeLimit: const Duration(seconds: 5),
       );
     } catch (e) {
-      // ถ้าค้าง หรือหาสัญญาณไม่เจอ ให้ดึงค่าล่าสุดเท่าที่หาได้
       return await geo.Geolocator.getLastKnownPosition();
     }
   }
@@ -203,7 +191,6 @@ class _RouteMapPageState extends State<RouteMapPage> {
     if (_points == null) return;
     await _points!.deleteAll();
 
-    // ดึงรูปรถ/พิน ถ้าไม่มีจะข้ามไปไม่พัง
     if (_markerBytes != null) {
       await _points!.create(
         PointAnnotationOptions(
@@ -233,7 +220,7 @@ class _RouteMapPageState extends State<RouteMapPage> {
     _posSub = geo.Geolocator.getPositionStream(
       locationSettings: const geo.LocationSettings(
         accuracy: geo.LocationAccuracy.high,
-        distanceFilter: 10, // อัปเดตเมื่อขยับ 10 เมตร (ประหยัดแบต)
+        distanceFilter: 10,
       ),
     ).listen((geo.Position pos) async {
       if (!mounted || _points == null || _myMarker == null) return;
@@ -264,7 +251,7 @@ class _RouteMapPageState extends State<RouteMapPage> {
           lineJoin: LineJoin.ROUND,
           lineCap: LineCap.ROUND,
           lineWidth: 5.0,
-          lineColor: 0xFF2196F3, // สีฟ้าที่ดูสะอาดตา
+          lineColor: 0xFF2196F3, 
         ),
       );
     }
@@ -322,7 +309,6 @@ class _RouteMapPageState extends State<RouteMapPage> {
   }
 }
 
-// Widget สำหรับปุ่มลอยตัว (Floating Action Button สไตล์มินิมอล)
 class _FloatingIconButton extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
@@ -349,7 +335,6 @@ class _FloatingIconButton extends StatelessWidget {
   }
 }
 
-// Widget สำหรับแสดงข้อมูลเส้นทางด้านล่าง
 class _InfoCard extends StatelessWidget {
   final String title;
   final bool loading;
