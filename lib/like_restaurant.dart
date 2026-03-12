@@ -135,7 +135,6 @@ class _LikeRestaurantPageState extends State<LikeRestaurantPage> {
         title: const Text('ร้านอาหารที่ถูกใจ', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0,
-        // เอาปุ่ม Back ด้านซ้ายบนออก เพราะเรามีปุ่ม Home ข้างล่างแล้ว
         automaticallyImplyLeading: false, 
       ),
       body: StreamBuilder<DocumentSnapshot>(
@@ -201,10 +200,6 @@ class _LikeRestaurantPageState extends State<LikeRestaurantPage> {
           );
         },
       ),
-      
-      // ==========================================
-      // เพิ่มแถบเมนูด้านล่างเข้ามาในหน้านี้ด้วย
-      // ==========================================
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(20),
         height: 60,
@@ -214,21 +209,17 @@ class _LikeRestaurantPageState extends State<LikeRestaurantPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            // ปุ่ม Home - กดแล้วย้อนกลับไปหน้า MainPage
             IconButton(
               icon: const Icon(Icons.home_outlined, color: Colors.white), // ไอคอนโปร่ง
               onPressed: () {
                 Navigator.pop(context); 
               },
             ),
-            // ปุ่ม Favorite - อยู่หน้านี้อยู่แล้ว เลยเป็นไอคอนทึบ
             IconButton(
               icon: const Icon(Icons.favorite, color: Colors.white), // ไอคอนทึบ
               onPressed: () {
-                // ไม่ต้องทำอะไร
               },
             ),
-            // ปุ่ม Settings
             IconButton(
               icon: const Icon(Icons.settings_outlined, color: Colors.white),
               onPressed: () {},
@@ -236,7 +227,6 @@ class _LikeRestaurantPageState extends State<LikeRestaurantPage> {
           ],
         ),
       ),
-      // ==========================================
     );
   }
 }

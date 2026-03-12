@@ -361,7 +361,6 @@ class _MainPageState extends State<MainPage> {
             IconButton(
               icon: const Icon(Icons.settings_outlined, color: Colors.white),
               onPressed: () {
-                // ถ้าอยากให้ปุ่มเฟืองไปหน้า ProfilePage ด้วย ก็เพิ่ม Navigator ตรงนี้ได้เลยครับ
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const ProfilePage()),
@@ -438,7 +437,7 @@ class RestaurantCardPlaceholder extends StatelessWidget {
                   image: NetworkImage(imageUrl),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.3), BlendMode.darken))
+                     Colors.black.withValues(alpha: 0.3), BlendMode.darken))
               : null,
         ),
         child: Stack(

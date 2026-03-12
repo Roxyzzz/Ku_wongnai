@@ -13,7 +13,6 @@ Future<void> main() async {
 
   const accessToken = String.fromEnvironment('ACCESS_TOKEN');
   MapboxOptions.setAccessToken(accessToken);
-  // ✅ init Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
