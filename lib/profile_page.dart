@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:ku_wongnai/welcome.dart';
 
+import 'signin.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -205,9 +207,13 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> logout() async {
-    await FirebaseAuth.instance.signOut();
-    if (mounted) {
-      Navigator.of(context).pushReplacementNamed('/login');
+  await FirebaseAuth.instance.signOut();
+  if (mounted) {
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const WelcomePage()),
+      (Route<dynamic> route) => false,
+    );
     }
   }
 

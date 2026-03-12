@@ -194,13 +194,6 @@ class _MainPageState extends State<MainPage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 15),
-                  const Icon(Icons.notifications_none, color: Colors.white),
-                  const SizedBox(width: 10),
-                  IconButton(onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage(),
-                    ),);
-                  } , icon: const Icon(Icons.person_outline , color: Colors.white,))
                 ],
               ),
             ),
@@ -359,7 +352,7 @@ class _MainPageState extends State<MainPage> {
               },
             ),
             IconButton(
-              icon: const Icon(Icons.settings_outlined, color: Colors.white),
+              icon: const Icon(Icons.person_outline, color: Colors.white),
               onPressed: () {
                 Navigator.push(
                   context,
