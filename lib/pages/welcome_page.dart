@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'signin.dart';
-import 'register.dart';
+import 'package:ku_wongnai/pages/signin_page.dart';
+import 'package:ku_wongnai/pages/register_page.dart';
 
 class WelcomePage extends StatelessWidget {
   const WelcomePage({super.key});

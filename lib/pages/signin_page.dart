@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 // 1. ตรวจสอบว่ามีการ import ไฟล์ main_page.dart [cite: 138, 291, 435]
-import 'main_page.dart'; 
+import 'package:ku_wongnai/pages/main_page.dart';
 
 class PasswordField extends StatefulWidget {
   const PasswordField({super.key, required this.controller});

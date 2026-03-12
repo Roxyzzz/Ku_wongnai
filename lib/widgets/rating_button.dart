@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class RatingButton extends StatelessWidget {
   final String restaurantId;
@@ -15,6 +16,7 @@ class RatingButton extends StatelessWidget {
 
   void _showRatingBottomSheet(BuildContext context) {
     int currentRating = 0; 
+    final TextEditingController commentController = TextEditingController();
 
     showModalBottomSheet(
       context: context,
@@ -70,6 +72,31 @@ class RatingButton extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                  const SizedBox(height: 15),
+
+                  // ช่องกรอกข้อความรีวิว
+                  TextField(
+                    controller: commentController,
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      hintText: 'เขียนรีวิวของคุณที่นี่ (ไม่บังคับ)',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: const BorderSide(color: Colors.orange),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey.shade50,
+                    ),
+                  ),
+
                   const SizedBox(height: 25),
 
                   SizedBox(
@@ -84,6 +111,11 @@ class RatingButton extends StatelessWidget {
                       onPressed: currentRating == 0 
                         ? null 
                         : () async {
+                            final String comment = commentController.text.trim();
+                            // ดึง username มาจาก current user (ถ้ามี) หรือใช้คำว่า "ผู้ใช้ Wongnai" แทน
+                            final authUser = FirebaseAuth.instance.currentUser;
+                            final String userName = authUser?.displayName ?? authUser?.email?.split('@').first ?? 'ผู้ใช้วงใน';
+                            
                             Navigator.pop(context); 
 
                             if (currentUserId.isEmpty) {
@@ -125,17 +157,23 @@ class RatingButton extends StatelessWidget {
 
                                 transaction.set(reviewRef, {
                                   'userId': currentUserId,
+                                  'userName': userName,
                                   'rating': currentRating,
+                                  'comment': comment,
                                   'timestamp': FieldValue.serverTimestamp(),
                                 });
                               });
 
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('บันทึกคะแนนสำเร็จ ขอบคุณครับ!')));
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('บันทึกคะแนนและรีวิวสำเร็จ ขอบคุณครับ!')));
+                              }
                             } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')));
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('เกิดข้อผิดพลาด ลองใหม่อีกครั้ง')));
+                              }
                             }
                           },
-                      child: const Text('ส่งคะแนน', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                      child: const Text('ส่งรีวิว', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
                     ),
                   ),
                   const SizedBox(height: 10),

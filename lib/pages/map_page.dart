@@ -7,6 +7,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:http/http.dart' as http;
 import 'package:mapbox_maps_flutter/mapbox_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart' as geo;
+import 'package:ku_wongnai/utils/restaurant_utils.dart';
 
 const String mapboxToken = String.fromEnvironment('ACCESS_TOKEN');
 
@@ -30,7 +31,8 @@ class _RouteMapPageState extends State<RouteMapPage> {
   MapboxMap? _map;
   PointAnnotationManager? _points;
 
-  Uint8List? _markerBytes;
+  Uint8List? _markerBytes;       // 📍 หมุดร้านอาหาร (destination)
+  Uint8List? _myMarkerBytes;     // 🔵 blue dot (current location)
   StreamSubscription<geo.Position>? _posSub;
   PointAnnotation? _myMarker;
 
@@ -62,9 +64,10 @@ class _RouteMapPageState extends State<RouteMapPage> {
   }
 
   Future<void> _loadMarkerSafe() async {
-      final byteData = await rootBundle.load('assets/images/marker.png');
-      _markerBytes = byteData.buffer.asUint8List();
-
+    final byteData = await rootBundle.load('assets/images/marker.png');
+    _markerBytes = byteData.buffer.asUint8List();
+    // สร้าง blue dot สำหรับตำแหน่งของผู้ใช้
+    _myMarkerBytes = await generateLocationMarkerPng(size: 80);
   }
 
   @override
@@ -191,6 +194,7 @@ class _RouteMapPageState extends State<RouteMapPage> {
     if (_points == null) return;
     await _points!.deleteAll();
 
+    // 📍 หมุด Destination (ร้านอาหาร) — ใช้ marker.png
     if (_markerBytes != null) {
       await _points!.create(
         PointAnnotationOptions(
@@ -203,13 +207,17 @@ class _RouteMapPageState extends State<RouteMapPage> {
           textSize: 12,
         ),
       );
+    }
 
+    // 🔵 หมุด Current Location — ใช้ blue dot
+    final locationImg = _myMarkerBytes ?? _markerBytes;
+    if (locationImg != null) {
       _myMarker = await _points!.create(
         PointAnnotationOptions(
           geometry: Point(coordinates: Position(myPos.longitude, myPos.latitude)),
-          image: _markerBytes!,
-          iconSize: 0.20,
-          iconAnchor: IconAnchor.BOTTOM,
+          image: locationImg,
+          iconSize: _myMarkerBytes != null ? 0.50 : 0.18,
+          iconAnchor: IconAnchor.CENTER,
         ),
       );
     }
