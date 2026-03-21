@@ -26,6 +26,7 @@ class UserService {
       'email': user.email,
       'name': name.trim(),
       'address': address.trim(),
+      'role': 'user',
       'registeredAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
       'favoriteRestaurants': [],

@@ -8,6 +8,8 @@ import 'package:ku_wongnai/widgets/restaurant_detail_sheet.dart';
 import 'package:ku_wongnai/pages/nearby_restaurants_page.dart';
 import 'package:ku_wongnai/pages/like_restaurant_page.dart';
 import 'package:ku_wongnai/pages/profile_page.dart';
+import 'package:ku_wongnai/pages/add_restaurant_page.dart';
+import 'package:ku_wongnai/pages/admin_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -20,10 +22,29 @@ class _MainPageState extends State<MainPage> {
   String selectedCategory = 'all';
   String selectedFoodType = 'all';
   String searchQuery = '';
+  String _userRole = 'user';
 
   String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
 
-  // หมวดหมู่ใหญ่
+  @override
+  void initState() {
+    super.initState();
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists && mounted) {
+        setState(() {
+          _userRole = (doc.data()?['role'] ?? 'user').toString();
+        });
+      }
+    } catch (_) {}
+  }
+
   static const _categories = [
     {'value': 'all', 'label': 'ทั้งหมด', 'icon': Icons.apps},
     {'value': 'food', 'label': 'ร้านอาหาร', 'icon': Icons.restaurant},
@@ -31,7 +52,6 @@ class _MainPageState extends State<MainPage> {
     {'value': 'drink', 'label': 'เครื่องดื่ม', 'icon': Icons.local_drink},
   ];
 
-  // foodTypes ตาม category
   static const Map<String, List<String>> _foodTypesByCategory = {
     'food': ['ก๋วยเตี๋ยว', 'ข้าวราดแกง', 'อาหารตามสั่ง', 'ส้มตำ', 'ยำ', 'เนื้อย่าง', 'ปิ้งย่าง', 'ผัดไทย', 'อาหารญี่ปุ่น'],
     'cafe': ['กาแฟ', 'ชา', 'เบเกอรี่', 'ชาไข่มุก', 'ชาผลไม้', 'ชานม', 'น้ำผลไม้', 'สมูทตี้', 'เครื่องดื่มสุขภาพ'],
@@ -46,8 +66,6 @@ class _MainPageState extends State<MainPage> {
 
   List<QueryDocumentSnapshot> _filterDocs(List<QueryDocumentSnapshot> docs) {
     var result = docs;
-
-    // filter ชื่อร้าน
     if (searchQuery.isNotEmpty) {
       result = result.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
@@ -57,8 +75,6 @@ class _MainPageState extends State<MainPage> {
         return name.contains(q) || desc.contains(q);
       }).toList();
     }
-
-    // filter foodType
     if (selectedFoodType != 'all') {
       result = result.where((doc) {
         final data = doc.data() as Map<String, dynamic>;
@@ -66,7 +82,6 @@ class _MainPageState extends State<MainPage> {
         return foodTypes.contains(selectedFoodType);
       }).toList();
     }
-
     return result;
   }
 
@@ -81,26 +96,64 @@ class _MainPageState extends State<MainPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // ========== Search Bar ==========
+            // ========== Search Bar + Admin Button ==========
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(25),
-                ),
-                child: TextField(
-                  onChanged: (value) => setState(() => searchQuery = value),
-                  decoration: const InputDecoration(
-                    hintText: 'ค้นหาร้านอาหาร...',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    prefixIcon: Icon(Icons.search, color: Colors.grey),
-                    suffixIcon: Icon(Icons.tune, color: Colors.orange),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 15),
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 10),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.06),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        onChanged: (value) => setState(() => searchQuery = value),
+                        decoration: const InputDecoration(
+                          hintText: 'ค้นหาร้านอาหาร...',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          prefixIcon: Icon(Icons.search, color: Colors.grey),
+                          suffixIcon: Icon(Icons.tune, color: Colors.orange),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 15),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                  if (_userRole == 'admin') ...[
+                    const SizedBox(width: 10),
+                    GestureDetector(
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const AdminPage()),
+                      ),
+                      child: Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE85B2A),
+                          borderRadius: BorderRadius.circular(25),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFE85B2A).withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.admin_panel_settings, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
 
@@ -116,7 +169,7 @@ class _MainPageState extends State<MainPage> {
                   ),
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(25),
+                  padding: const EdgeInsets.fromLTRB(25, 25, 25, 100),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -127,7 +180,7 @@ class _MainPageState extends State<MainPage> {
                           return GestureDetector(
                             onTap: () => setState(() {
                               selectedCategory = cat['value'] as String;
-                              selectedFoodType = 'all'; // reset food type
+                              selectedFoodType = 'all';
                             }),
                             child: CategoryItem(
                               label: cat['label'] as String,
@@ -146,7 +199,6 @@ class _MainPageState extends State<MainPage> {
                           child: ListView(
                             scrollDirection: Axis.horizontal,
                             children: [
-                              // ปุ่ม "ทั้งหมด"
                               Padding(
                                 padding: const EdgeInsets.only(right: 8),
                                 child: ChoiceChip(
@@ -166,7 +218,6 @@ class _MainPageState extends State<MainPage> {
                                   ),
                                 ),
                               ),
-                              // foodType chips
                               ...foodTypes.map((ft) => Padding(
                                 padding: const EdgeInsets.only(right: 8),
                                 child: ChoiceChip(
@@ -192,6 +243,89 @@ class _MainPageState extends State<MainPage> {
                       ],
 
                       const SizedBox(height: 20),
+
+                      // ========== Banner เพิ่มร้านอาหาร ==========
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const AddRestaurantPage()),
+                        ),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFE85B2A), Color(0xFFFF8C42)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFFE85B2A).withValues(alpha: 0.35),
+                                blurRadius: 12,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 46,
+                                height: 46,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: const Icon(
+                                  Icons.add_business_rounded,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'เพิ่มร้านอาหารของคุณ',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2),
+                                    Text(
+                                      'แชร์ร้านโปรดให้คนอื่นรู้จัก',
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                width: 32,
+                                height: 32,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.25),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: const Icon(
+                                  Icons.arrow_forward_ios_rounded,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
                       const Text(
                         'ร้านอาหารแนะนำ',
                         style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -206,12 +340,31 @@ class _MainPageState extends State<MainPage> {
                             return const Center(child: CircularProgressIndicator());
                           }
                           if (snapshot.hasError) {
-                            return const Center(child: Text('เกิดข้อผิดพลาดในการโหลดข้อมูล'));
+                            return Center(
+                              child: Column(
+                                children: [
+                                  const Icon(Icons.wifi_off, size: 48, color: Colors.grey),
+                                  const SizedBox(height: 8),
+                                  Text('เกิดข้อผิดพลาด: ${snapshot.error}',
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(color: Colors.grey)),
+                                ],
+                              ),
+                            );
                           }
                           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                             return const Padding(
                               padding: EdgeInsets.only(top: 20),
-                              child: Center(child: Text('ไม่มีข้อมูลในหมวดหมู่นี้')),
+                              child: Center(
+                                child: Column(
+                                  children: [
+                                    Icon(Icons.restaurant_outlined, size: 64, color: Colors.grey),
+                                    SizedBox(height: 10),
+                                    Text('ยังไม่มีร้านอาหารในหมวดหมู่นี้',
+                                        style: TextStyle(color: Colors.grey)),
+                                  ],
+                                ),
+                              ),
                             );
                           }
 
@@ -220,7 +373,16 @@ class _MainPageState extends State<MainPage> {
                           if (filtered.isEmpty) {
                             return const Padding(
                               padding: EdgeInsets.only(top: 20),
-                              child: Center(child: Text('ไม่พบร้านอาหารที่ค้นหา')),
+                              child: Center(
+                                child: Column(
+                                  children: [
+                                    Icon(Icons.search_off, size: 64, color: Colors.grey),
+                                    SizedBox(height: 10),
+                                    Text('ไม่พบร้านอาหารที่ค้นหา',
+                                        style: TextStyle(color: Colors.grey)),
+                                  ],
+                                ),
+                              ),
                             );
                           }
 
@@ -244,6 +406,7 @@ class _MainPageState extends State<MainPage> {
                                   data: data,
                                   restaurantId: doc.id,
                                   currentUserId: currentUserId,
+                                  userRole: _userRole,
                                 ),
                               );
                             },
@@ -259,13 +422,20 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
 
-      // ========== Bottom Nav ==========
+      // ========== Bottom Nav (clean, no gap) ==========
       bottomNavigationBar: Container(
         margin: const EdgeInsets.all(20),
         height: 60,
         decoration: BoxDecoration(
           color: const Color(0xFFE85B2A),
           borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFE85B2A).withValues(alpha: 0.4),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -289,7 +459,8 @@ class _MainPageState extends State<MainPage> {
                 Navigator.push(
                   context,
                   PageRouteBuilder(
-                    pageBuilder: (context, animation1, animation2) => const LikeRestaurantPage(),
+                    pageBuilder: (context, animation1, animation2) =>
+                        const LikeRestaurantPage(),
                     transitionDuration: Duration.zero,
                     reverseTransitionDuration: Duration.zero,
                   ),
@@ -302,7 +473,7 @@ class _MainPageState extends State<MainPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const ProfilePage()),
-                );
+                ).then((_) => _loadUserRole());
               },
             ),
           ],

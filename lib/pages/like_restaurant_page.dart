@@ -15,6 +15,24 @@ class LikeRestaurantPage extends StatefulWidget {
 
 class _LikeRestaurantPageState extends State<LikeRestaurantPage> {
   String get currentUserId => FirebaseAuth.instance.currentUser?.uid ?? '';
+  String _userRole = 'user';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists && mounted) {
+        setState(() => _userRole = (doc.data()?['role'] ?? 'user').toString());
+      }
+    } catch (_) {}
+  }
 
   void _showRestaurantDetails(BuildContext context, Map<String, dynamic> data, String restaurantId) {
     showRestaurantDetailSheet(
@@ -22,6 +40,7 @@ class _LikeRestaurantPageState extends State<LikeRestaurantPage> {
       data: data,
       restaurantId: restaurantId,
       currentUserId: currentUserId,
+      userRole: _userRole,
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:ku_wongnai/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -28,11 +29,26 @@ class _ProfilePageState extends State<ProfilePage> {
   String email = '';
   String photoPath = '';
   File? selectedImage;
+  String _userRole = 'user';
 
   @override
   void initState() {
     super.initState();
     loadUserData();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists && mounted) {
+        setState(() {
+          _userRole = (doc.data()?['role'] ?? 'user').toString();
+        });
+      }
+    } catch (_) {}
   }
 
   String _nameKey(String uid) => 'profile_name_$uid';
@@ -367,6 +383,42 @@ class _ProfilePageState extends State<ProfilePage> {
                                   size: 20,
                                 ),
                               ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Role Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _userRole == 'admin'
+                            ? const Color(0xFFE85B2A)
+                            : Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _userRole == 'admin'
+                                ? Icons.admin_panel_settings
+                                : Icons.person,
+                            size: 16,
+                            color: _userRole == 'admin'
+                                ? Colors.white
+                                : Colors.orange.shade700,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            _userRole == 'admin' ? 'Admin' : 'User',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: _userRole == 'admin'
+                                  ? Colors.white
+                                  : Colors.orange.shade700,
                             ),
                           ),
                         ],
