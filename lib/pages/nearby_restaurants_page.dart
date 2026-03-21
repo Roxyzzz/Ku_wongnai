@@ -14,12 +14,11 @@ class NearbyRestaurantsPage extends StatefulWidget {
 
 class _NearbyRestaurantsPageState extends State<NearbyRestaurantsPage> {
   bool isLoading = true;
-  String locationNote = ''; // แสดงแจ้งเตือนเมื่อใช้ fallback location
+  String locationNote = '';
   geo.Position? currentPosition;
   String selectedFoodType = 'all';
+  String _userRole = 'user';
 
-
-  // รายการ foodTypes รวมทุก category สำหรับหน้านี้
   static const List<String> _allFoodTypes = [
     'ก๋วยเตี๋ยว', 'ข้าวราดแกง', 'อาหารตามสั่ง', 'ส้มตำ', 'ยำ',
     'เนื้อย่าง', 'ปิ้งย่าง', 'ผัดไทย', 'อาหารญี่ปุ่น',
@@ -33,6 +32,18 @@ class _NearbyRestaurantsPageState extends State<NearbyRestaurantsPage> {
   void initState() {
     super.initState();
     _loadCurrentLocation();
+    _loadRole();
+  }
+
+  Future<void> _loadRole() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(uid).get();
+      if (doc.exists && mounted) {
+        setState(() => _userRole = (doc.data()?['role'] ?? 'user').toString());
+      }
+    } catch (_) {}
   }
 
   // ตำแหน่งกลาง KU สำหรับ fallback (กรณี emulator หรือ location ไม่ได้)
@@ -288,6 +299,7 @@ class _NearbyRestaurantsPageState extends State<NearbyRestaurantsPage> {
                                       data: data,
                                       restaurantId: id,
                                       currentUserId: currentUserId,
+                                      userRole: _userRole,
                                       distanceKm: distanceKm,
                                     ),
                                     borderRadius: BorderRadius.circular(20),
