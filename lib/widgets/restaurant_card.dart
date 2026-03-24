@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ku_wongnai/utils/restaurant_utils.dart';
+import 'package:ku_wongnai/widgets/storage_image_widget.dart';
 
 /// การ์ดแสดงร้านอาหารในรูปแบบ Grid
 class RestaurantCard extends StatelessWidget {
@@ -16,31 +17,43 @@ class RestaurantCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final String name = data['name'] ?? 'ไม่มีชื่อ';
     final String rating = data['avgRating']?.toString() ?? '0.0';
-    final String imageUrl = data['imageUrl'] ?? '';
+    final String? imagePath = data['imagePath'] as String?;
     final List<dynamic> foodTypes = data['foodTypes'] ?? [];
     final openTime = data['openTime'];
     final closeTime = data['closeTime'];
 
+    final bool hasImage = imagePath != null && imagePath.isNotEmpty;
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey[200],
-          borderRadius: BorderRadius.circular(20),
-          image: imageUrl.isNotEmpty
-              ? DecorationImage(
-                  image: NetworkImage(imageUrl),
-                  fit: BoxFit.cover,
-                  colorFilter: ColorFilter.mode(
-                    Colors.black.withValues(alpha: 0.3),
-                    BlendMode.darken,
-                  ),
-                )
-              : null,
-        ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
         child: Stack(
+          fit: StackFit.expand,
           children: [
+            // พื้นหลัง / รูปจาก Firebase Storage
+            if (hasImage)
+              StorageImageBox(
+                storagePath: imagePath,
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.45),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            else
+              Container(color: Colors.grey[200]),
+
+            // เนื้อหาข้อมูล
             Padding(
               padding: const EdgeInsets.all(10),
               child: Column(
@@ -54,13 +67,12 @@ class RestaurantCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: imageUrl.isNotEmpty ? Colors.white : Colors.black,
+                          color: hasImage ? Colors.white : Colors.black,
                         ),
                       ),
                     ],
                   ),
                   const Spacer(),
-                  // แสดง foodType tag อันแรก (ถ้ามี)
                   if (foodTypes.isNotEmpty)
                     Container(
                       margin: const EdgeInsets.only(bottom: 4),
@@ -82,7 +94,7 @@ class RestaurantCard extends StatelessWidget {
                     name,
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: imageUrl.isNotEmpty ? Colors.white : Colors.black,
+                      color: hasImage ? Colors.white : Colors.black,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

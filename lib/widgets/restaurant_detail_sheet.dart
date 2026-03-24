@@ -4,6 +4,7 @@ import 'package:ku_wongnai/pages/map_page.dart';
 import 'package:ku_wongnai/widgets/favorite_button.dart';
 import 'package:ku_wongnai/widgets/rating_button.dart';
 import 'package:ku_wongnai/utils/restaurant_utils.dart';
+import 'package:ku_wongnai/widgets/storage_image_widget.dart';
 
 /// เปิดดูรูปเต็มจอ
 void _showFullImage(BuildContext context, String imageUrl) {
@@ -113,7 +114,7 @@ void showRestaurantDetailSheet({
 }) {
   final String name = data['name'] ?? 'ไม่มีชื่อร้าน';
   final String desc = data['desc'] ?? 'ไม่มีรายละเอียด';
-  final String imageUrl = data['imageUrl'] ?? '';
+  final String? imagePath = data['imagePath'] as String?;
   final String openTime = data['openTime'] ?? '-';
   final String closeTime = data['closeTime'] ?? '-';
   final lat = (data['latitude'] as num?)?.toDouble();
@@ -150,25 +151,26 @@ void showRestaurantDetailSheet({
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              // รูปภาพร้าน
-              Container(
-                height: 150,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(15),
-                  image: imageUrl.isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(imageUrl),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
+              // รูปภาพร้าน (Firebase Storage)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(15),
+                child: SizedBox(
+                  height: 150,
+                  width: double.infinity,
+                  child: StorageImageWidget(
+                    storagePath: imagePath,
+                    fit: BoxFit.cover,
+                    height: 150,
+                    width: double.infinity,
+                    placeholder: Container(
+                      height: 150,
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Icon(Icons.restaurant, size: 50, color: Colors.grey),
+                      ),
+                    ),
+                  ),
                 ),
-                child: imageUrl.isEmpty
-                    ? const Center(
-                        child: Icon(Icons.image, size: 50, color: Colors.grey),
-                      )
-                    : null,
               ),
               const SizedBox(height: 15),
               Row(

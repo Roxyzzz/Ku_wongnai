@@ -1,6 +1,47 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import './seed_restaurants.dart';
+
+// 1x1 transparent PNG placeholder (68 bytes)
+final Uint8List _placeholderPng = Uint8List.fromList([
+  0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+  0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+  0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+  0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4,
+  0x89, 0x00, 0x00, 0x00, 0x0B, 0x49, 0x44, 0x41,
+  0x54, 0x78, 0x9C, 0x62, 0x00, 0x01, 0x00, 0x00,
+  0x05, 0x00, 0x01, 0x0D, 0x0A, 0x2D, 0xB4, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44,
+  0xAE, 0x42, 0x60, 0x82,
+]);
+
+// รายชื่อ folder ของทุกร้านใน Firebase Storage
+const List<String> _restaurantFolders = [
+  'restaurants/artofcoffee/cover.jpg',
+  'restaurants/bagbagbrewcoffee/cover.jpg',
+  'restaurants/inthanincoffeeku/cover.jpg',
+  'restaurants/truecoffeeku/cover.jpg',
+  'restaurants/yogurutoชั้น1อาคารวิศวกรรมสิ่งแวดล้อม/cover.jpg',
+  'restaurants/beleafjuiceshop/cover.jpg',
+  'restaurants/cafeamazonสาขาอาคารพันธุ์ไม้/cover.jpg',
+  'restaurants/chamaชามะชาไข่มุกระเบิด/cover.jpg',
+  'restaurants/siskucoffee/cover.jpg',
+  'restaurants/starbucksตรงข้ามคณะบริหารฯ/cover.jpg',
+  'restaurants/เนสกาแฟสตรีทคาเฟ่/cover.jpg',
+  'restaurants/maxbeefyakinikux/cover.jpg',
+  'restaurants/ม่าม่าพร/cover.jpg',
+  'restaurants/ศูนย์อาหารคณะวิทยาศาสตร์/cover.jpg',
+  'restaurants/ศูนย์อาหารคณะวิศวกรรมศาสตร์/cover.jpg',
+  'restaurants/ศูนย์อาหารคณะเกษตร/cover.jpg',
+  'restaurants/โรงอาหารกลาง1บาร์ใหม่/cover.jpg',
+  'restaurants/โรงอาหารกลาง2บาร์ใหม่กว่า/cover.jpg',
+  'restaurants/โรงอาหารคณะบริหารธุรกิจ/cover.jpg',
+  'restaurants/โรงอาหารคณะวนศาสตร์/cover.jpg',
+  'restaurants/โรงอาหารคณะสถาปัตยกรรมศาสตร์/cover.jpg',
+  'restaurants/โรงอาหารคณะสัตวแพทยศาสตร์/cover.jpg',
+];
 
 class SeedPage extends StatefulWidget {
   const SeedPage({super.key});
@@ -13,32 +54,62 @@ class _SeedPageState extends State<SeedPage> {
   bool _isLoading = false;
   bool _isExporting = false;
   bool _isUpdating = false;
+  bool _isCreatingFolders = false;
 
   Future<void> _handleUpload() async {
     setState(() => _isLoading = true);
-
     try {
       await seedRestaurants();
-
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('สำเร็จ!'),
-          backgroundColor: Colors.green,
+        const SnackBar(content: Text('สำเร็จ!'), backgroundColor: Colors.green, behavior: SnackBarBehavior.floating),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('ผิดพลาด: $e'), backgroundColor: Colors.red, behavior: SnackBarBehavior.floating),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleCreateFolders() async {
+    setState(() => _isCreatingFolders = true);
+    int success = 0;
+    int skip = 0;
+    try {
+      for (final path in _restaurantFolders) {
+        final ref = FirebaseStorage.instance.ref(path);
+        try {
+          // ตรวจสอบว่ามีไฟล์อยู่แล้วไหม (ถ้ามีจะ skip)
+          await ref.getMetadata();
+          skip++;
+        } catch (_) {
+          // ไม่มีไฟล์ → อัปโหลด placeholder
+          await ref.putData(
+            _placeholderPng,
+            SettableMetadata(contentType: 'image/png', customMetadata: {'placeholder': 'true'}),
+          );
+          success++;
+        }
+      }
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('สร้าง folder สำเร็จ $success ร้าน (ข้าม $skip ที่มีอยู่แล้ว)'),
+          backgroundColor: Colors.purple,
           behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('ผิดพลาด: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
+        SnackBar(content: Text('ผิดพลาด: $e'), backgroundColor: Colors.red, behavior: SnackBarBehavior.floating),
       );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isCreatingFolders = false);
     }
   }
 
@@ -226,8 +297,27 @@ class _SeedPageState extends State<SeedPage> {
               ),
             ),
 
+            const SizedBox(height: 16),
+
+            ElevatedButton.icon(
+              onPressed: _isCreatingFolders ? null : _handleCreateFolders,
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                backgroundColor: Colors.purple,
+                foregroundColor: Colors.white,
+              ),
+              icon: _isCreatingFolders
+                  ? const SizedBox(width: 20, height: 20,
+                      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                  : const Icon(Icons.create_new_folder),
+              label: Text(
+                _isCreatingFolders ? 'กำลังสร้าง folder...' : 'สร้าง Folder ทุกร้านใน Storage',
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+
             const SizedBox(height: 20),
-            if (!_isLoading && !_isExporting && !_isUpdating)
+            if (!_isLoading && !_isExporting && !_isUpdating && !_isCreatingFolders)
               TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: const Text('กลับหน้าหลัก', style: TextStyle(color: Colors.grey)),

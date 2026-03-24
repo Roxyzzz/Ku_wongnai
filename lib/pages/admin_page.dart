@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ku_wongnai/widgets/storage_image_widget.dart';
 
 class AdminPage extends StatelessWidget {
   const AdminPage({super.key});
@@ -181,8 +182,9 @@ class AdminPage extends StatelessWidget {
                               final String name =
                                   data['name'] ?? 'ไม่มีชื่อร้าน';
                               final String desc = data['desc'] ?? '';
-                              final String imageUrl =
-                                  data['imageUrl'] ?? '';
+                              final String? imagePath =
+                                  data['imagePath'] as String?;
+                              final hasImage = imagePath != null && imagePath.isNotEmpty;
                               final String category =
                                   data['category'] ?? '';
                               final List foodTypes =
@@ -216,20 +218,18 @@ class AdminPage extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // รูปภาพร้าน
-                                    if (imageUrl.isNotEmpty)
+                                    // รูปภาพร้าน (Firebase Storage)
+                                    if (hasImage)
                                       ClipRRect(
                                         borderRadius: const BorderRadius.only(
                                           topLeft: Radius.circular(20),
                                           topRight: Radius.circular(20),
                                         ),
-                                        child: Image.network(
-                                          imageUrl,
+                                        child: StorageImageWidget(
+                                          storagePath: imagePath,
                                           height: 140,
                                           width: double.infinity,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (_, __, ___) =>
-                                              const SizedBox.shrink(),
                                         ),
                                       )
                                     else

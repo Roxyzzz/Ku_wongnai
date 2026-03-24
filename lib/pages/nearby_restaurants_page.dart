@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:geolocator/geolocator.dart' as geo;
 
 import 'package:ku_wongnai/widgets/restaurant_detail_sheet.dart';
+import 'package:ku_wongnai/widgets/storage_image_widget.dart';
 
 class NearbyRestaurantsPage extends StatefulWidget {
   const NearbyRestaurantsPage({super.key});
@@ -289,7 +290,7 @@ class _NearbyRestaurantsPageState extends State<NearbyRestaurantsPage> {
 
                                   final String name = data['name'] ?? 'ไม่มีชื่อร้าน';
                                   final String desc = data['desc'] ?? '';
-                                  final String imageUrl = data['imageUrl'] ?? '';
+                                  final String? imagePath = data['imagePath'] as String?;
                                   final String rating = data['avgRating']?.toString() ?? '0.0';
                                   final List<dynamic> foodTypes = data['foodTypes'] ?? [];
 
@@ -322,16 +323,21 @@ class _NearbyRestaurantsPageState extends State<NearbyRestaurantsPage> {
                                           Container(
                                             width: 82,
                                             height: 82,
+                                            clipBehavior: Clip.antiAlias,
                                             decoration: BoxDecoration(
                                               color: Colors.grey[200],
                                               borderRadius: BorderRadius.circular(16),
-                                              image: imageUrl.isNotEmpty
-                                                  ? DecorationImage(image: NetworkImage(imageUrl), fit: BoxFit.cover)
-                                                  : null,
                                             ),
-                                            child: imageUrl.isEmpty
-                                                ? const Icon(Icons.image, color: Colors.grey)
-                                                : null,
+                                            child: StorageImageWidget(
+                                              storagePath: imagePath,
+                                              fit: BoxFit.cover,
+                                              width: 82,
+                                              height: 82,
+                                              placeholder: const Icon(
+                                                Icons.restaurant,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
                                           ),
                                           const SizedBox(width: 14),
                                           Expanded(
