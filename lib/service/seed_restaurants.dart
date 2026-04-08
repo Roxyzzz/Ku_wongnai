@@ -1,0 +1,398 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+final List<Map<String, dynamic>> kuRestaurants = [
+  // ========== DRINK / COFFEE ==========
+  {
+    "name": "A.R.T. - Art of Coffee",
+    "desc": "คาเฟ่กาแฟพิเศษ บรรยากาศชิลใต้ตึก",
+    "category": "drink",
+    "foodTypes": ["กาแฟ", "เครื่องดื่ม", "เบเกอรี่"],
+    "imagePath": "restaurants/artofcoffee/cover.jpg", // A.R.T. - Art of Coffee
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "16:00",
+    "avgRating": 4.3,
+    "ratingCount": 3,
+    "ratingSum": 13,
+    "latitude": 13.849171605884937,
+    "longitude": 100.56728832436434,
+  },
+  {
+    "name": "Bagbag Brew Coffee",
+    "desc": "คาเฟ่นั่งทำงาน มี Wi-Fi",
+    "category": "drink",
+    "foodTypes": ["กาแฟ", "เครื่องดื่ม"],
+    "imagePath": "restaurants/bagbagbrewcoffee/cover.jpg",
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "17:00",
+    "avgRating": 4.0,
+    "ratingCount": 2,
+    "ratingSum": 8,
+    "latitude": 13.845266333834187,
+    "longitude": 100.56944677791196,
+  },
+  {
+    "name": "Inthanin Coffee KU",
+    "desc": "ร้านกาแฟบรรยากาศชิลในมหาลัย",
+    "category": "drink",
+    "foodTypes": ["กาแฟ", "ชา", "เครื่องดื่ม"],
+    "imagePath": "restaurants/inthanincoffeeku/cover.jpg",
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "17:00",
+    "avgRating": 5.0,
+    "ratingCount": 1,
+    "ratingSum": 5,
+    "latitude": 13.847400133648271,
+    "longitude": 100.56893849491453,
+  },
+  {
+    "name": "True Coffee KU",
+    "desc": "คาเฟ่นั่งทำงาน อ่านหนังสือ",
+    "category": "drink",
+    "foodTypes": ["กาแฟ", "ชา", "เครื่องดื่ม"],
+    "imagePath": "restaurants/truecoffeeku/cover.jpg",
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "18:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.843183435514186,
+    "longitude": 100.5711444170066,
+  },
+  {
+    "name": "Yoguruto ชั้น 1 อาคารวิศวกรรมสิ่งแวดล้อม",
+    "desc": "โยเกิร์ตสดปั่นสไตล์ญี่ปุ่น เนื้อเนียน",
+    "category": "drink",
+    "foodTypes": ["โยเกิร์ต", "เครื่องดื่ม", "สมูทตี้"],
+    "imagePath": "restaurants/yogurutoชั้น1อาคารวิศวกรรมสิ่งแวดล้อม/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "09:00",
+    "closeTime": "17:30",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.84529222614992,
+    "longitude": 100.56946413826171,
+  },
+
+  // ========== CAFE ==========
+  {
+    "name": "Beleaf & juice Shop",
+    "desc": "น้ำผลไม้ปั่น สดชื่น",
+    "category": "cafe",
+    "foodTypes": ["น้ำผลไม้", "สมูทตี้", "เครื่องดื่มสุขภาพ"],
+    "imagePath": "restaurants/beleafjuiceshop/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "11:00",
+    "closeTime": "20:00",
+    "avgRating": 5.0,
+    "ratingCount": 1,
+    "ratingSum": 5,
+    "latitude": 13.846290087679805,
+    "longitude": 100.56476691668414,
+  },
+  {
+    "name": "Cafe Amazon สาขา อาคารพันธุ์ไม้",
+    "desc": "กาแฟมาตรฐานอเมซอน บรรยากาศร่มรื่น",
+    "category": "cafe",
+    "foodTypes": ["กาแฟ", "ชา", "เครื่องดื่ม"],
+    "imagePath": "restaurants/cafeamazonสาขาอาคารพันธุ์ไม้/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "17:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.84641639626245,
+    "longitude": 100.56462544723033,
+  },
+  {
+    "name": "Chama - ชามะ ชาไข่มุกระเบิด",
+    "desc": "ชานมไข่มุกและชาผลไม้",
+    "category": "cafe",
+    "foodTypes": ["ชาไข่มุก", "ชาผลไม้", "ชานม"],
+    "imagePath": "restaurants/chamaชามะชาไข่มุกระเบิด/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "09:00",
+    "closeTime": "19:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.846347715813677,
+    "longitude": 100.56503682173987,
+  },
+  {
+    "name": "SISKU COFFEE",
+    "desc": "โดดเด่นด้วยเมนูเครื่องดื่มหลากหลาย",
+    "category": "cafe",
+    "foodTypes": ["กาแฟ", "ชา", "เครื่องดื่ม"],
+    "imagePath": "restaurants/siskucoffee/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "17:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.847284800209291,
+    "longitude": 100.57036314907677,
+  },
+  {
+    "name": "Starbucks ตรงข้ามคณะบริหารฯ",
+    "desc": "ร้านกาแฟแบรนด์ดัง นั่งทำงาน พบปะเพื่อน",
+    "category": "cafe",
+    "foodTypes": ["กาแฟ", "ชา", "เบเกอรี่", "เครื่องดื่ม"],
+    "imagePath": "restaurants/starbucksตรงข้ามคณะบริหารฯ/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "19:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.844560045764654,
+    "longitude": 100.56886346072471,
+  },
+  {
+    "name": "เนสกาแฟ สตรีท คาเฟ่",
+    "desc": "กาแฟพร้อมดื่ม",
+    "category": "cafe",
+    "foodTypes": ["กาแฟ", "เครื่องดื่ม"],
+    "imagePath": "restaurants/เนสกาแฟสตรีทคาเฟ่/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "18:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.848688449651307,
+    "longitude": 100.56668180674717,
+  },
+
+  // ========== FOOD ==========
+  {
+    "name": "MaxBeef Yakinikux",
+    "desc": "ร้านบรรยากาศสไตล์คาเฟ่ (ราคานักศึกษา)",
+    "category": "food",
+    "foodTypes": ["เนื้อย่าง", "ปิ้งย่าง", "อาหารญี่ปุ่น"],
+    "imagePath": "restaurants/maxbeefyakinikux/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "10:00",
+    "closeTime": "19:00",
+    "avgRating": 5.0,
+    "ratingCount": 1,
+    "ratingSum": 5,
+    "latitude": 13.84605541605602,
+    "longitude": 100.56520768955991,
+  },
+  {
+    "name": "ม่าม่าพร",
+    "desc": "ยำมาม่าในตำนาน เครื่องแน่น รสจัดจ้าน",
+    "category": "food",
+    "foodTypes": ["ยำมาม่า", "ยำ", "อาหารตามสั่ง"],
+    "imagePath": "restaurants/ม่าม่าพร/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "08:00",
+    "closeTime": "17:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.844501062790398,
+    "longitude": 100.56921213266581,
+  },
+  {
+    "name": "ศูนย์อาหารคณะวิทยาศาสตร์",
+    "desc": "ศูนย์อาหารสำหรับนิสิตวิทยาศาสตร์ ราคานักศึกษา",
+    "category": "food",
+    "foodTypes": ["ข้าวราดแกง", "อาหารตามสั่ง", "ก๋วยเตี๋ยว", "ส้มตำ"],
+    "imagePath": "restaurants/ศูนย์อาหารคณะวิทยาศาสตร์/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "16:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.846278614814905,
+    "longitude": 100.57131997301506,
+  },
+  {
+    "name": "ศูนย์อาหารคณะวิศวกรรมศาสตร์",
+    "desc": "ศูนย์อาหารใกล้ตึกเรียนวิศวะ",
+    "category": "food",
+    "foodTypes": ["ข้าวราดแกง", "อาหารตามสั่ง", "ก๋วยเตี๋ยว", "ส้มตำ"],
+    "imagePath": "restaurants/ศูนย์อาหารคณะวิศวกรรมศาสตร์/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "05:30",
+    "closeTime": "18:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.846510702364734,
+    "longitude": 100.56967348457005,
+  },
+  {
+    "name": "ศูนย์อาหารคณะเกษตร",
+    "desc": "ศูนย์อาหารโซนคณะเกษตร",
+    "category": "food",
+    "foodTypes": ["ข้าวราดแกง", "อาหารตามสั่ง", "ก๋วยเตี๋ยว"],
+    "imagePath": "restaurants/ศูนย์อาหารคณะเกษตร/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "07:00",
+    "closeTime": "15:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": null,
+    "longitude": null,
+  },
+  {
+    "name": "โรงอาหารกลาง 1 (บาร์ใหม่)",
+    "desc": "โรงอาหารยอดนิยม ร้านอาหารหลากหลาย ราคานักศึกษา",
+    "category": "food",
+    "foodTypes": ["ก๋วยเตี๋ยว", "ข้าวราดแกง", "อาหารตามสั่ง", "ส้มตำ", "ผัดไทย"],
+    "imagePath": "restaurants/โรงอาหารกลาง1บาร์ใหม่/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "06:00",
+    "closeTime": "21:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.848908754331225,
+    "longitude": 100.56711001534337,
+  },
+  {
+    "name": "โรงอาหารกลาง 2 (บาร์ใหม่กว่า)",
+    "desc": "โรงอาหารขนาดใหญ่ ทันสมัย ใกล้คณะวิศวะ",
+    "category": "food",
+    "foodTypes": ["ก๋วยเตี๋ยว", "ข้าวราดแกง", "อาหารตามสั่ง", "ส้มตำ"],
+    "imagePath": "restaurants/โรงอาหารกลาง2บาร์ใหม่กว่า/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "06:00",
+    "closeTime": "15:30",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.852296736958907,
+    "longitude": 100.57170066931322,
+  },
+  {
+    "name": "โรงอาหารคณะบริหารธุรกิจ",
+    "desc": "โรงอาหารใกล้คณะบริหารธุรกิจ",
+    "category": "food",
+    "foodTypes": ["ข้าวราดแกง", "อาหารตามสั่ง", "ก๋วยเตี๋ยว"],
+    "imagePath": "restaurants/โรงอาหารคณะบริหารธุรกิจ/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "06:30",
+    "closeTime": "18:30",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.844613574370149,
+    "longitude": 100.56869476931323,
+  },
+  {
+    "name": "โรงอาหารคณะวนศาสตร์",
+    "desc": "โรงอาหารใกล้คณะวนศาสตร์",
+    "category": "food",
+    "foodTypes": ["ข้าวราดแกง", "อาหารตามสั่ง", "ก๋วยเตี๋ยว"],
+    "imagePath": "restaurants/โรงอาหารคณะวนศาสตร์/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "06:00",
+    "closeTime": "15:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.845906492905748,
+    "longitude": 100.57312192594232,
+  },
+  {
+    "name": "โรงอาหารคณะสถาปัตยกรรมศาสตร์",
+    "desc": "ศูนย์อาหารใกล้คณะสถาปัตยกรรมศาสตร์",
+    "category": "food",
+    "foodTypes": ["ข้าวราดแกง", "อาหารตามสั่ง", "ก๋วยเตี๋ยว", "ส้มตำ"],
+    "imagePath": "restaurants/โรงอาหารคณะสถาปัตยกรรมศาสตร์/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "05:00",
+    "closeTime": "18:00",
+    "avgRating": 0,
+    "ratingCount": 0,
+    "ratingSum": 0,
+    "latitude": 13.853687078005052,
+    "longitude": 100.56867362164104,
+  },
+  {
+    "name": "โรงอาหารคณะสัตวแพทยศาสตร์",
+    "desc": "โรงอาหารใกล้คณะสัตวแพทยศาสตร์ ใกล้กับคณะเทคนิคการสัตวแพทย์",
+    "category": "food",
+    "foodTypes": ["ข้าวราดแกง", "อาหารตามสั่ง", "ก๋วยเตี๋ยว", "ส้มตำ"],
+    "imagePath": "restaurants/โรงอาหารคณะสัตวแพทยศาสตร์/cover.jpg",
+
+    "address": "มหาวิทยาลัยเกษตรศาสตร์ บางเขน",
+    "openTime": "05:00",
+    "closeTime": "19:00",
+    "avgRating": 5.0,
+    "ratingCount": 1,
+    "ratingSum": 5,
+    "latitude": 13.844979510874493,
+    "longitude": 100.5781424687473,
+  },
+];
+
+String generateDocId(String name) {
+  return name
+      .toLowerCase()
+      .trim()
+      .replaceAll(RegExp(r'\s+'), '')
+      .replaceAll(RegExp(r'[^\u0E00-\u0E7Fa-z0-9]'), '');
+}
+
+Future<void> seedRestaurants() async {
+  final col = FirebaseFirestore.instance.collection('restaurants');
+
+  for (final r in kuRestaurants) {
+    final name = r['name'] as String;
+    if (name.isEmpty) continue;
+
+    final id = generateDocId(name);
+    final lat = r['latitude'] as double?;
+    final lng = r['longitude'] as double?;
+
+    final data = {
+      "name": r['name'],
+      "desc": r['desc'],
+      "category": r['category'],
+      "foodTypes": r['foodTypes'],
+      "address": r['address'],
+      "openTime": r['openTime'],
+      "closeTime": r['closeTime'],
+      "imagePath": r['imagePath'] ?? '',
+      "latitude": lat,
+      "longitude": lng,
+      "location": (lat != null && lng != null) ? GeoPoint(lat, lng) : null,
+      "googleMapsUrl": (lat != null && lng != null)
+          ? "https://www.google.com/maps/search/?api=1&query=$lat,$lng"
+          : null,
+      "updatedAt": FieldValue.serverTimestamp(),
+    };
+
+    await col.doc(id).set(data, SetOptions(merge: true));
+  }
+}
